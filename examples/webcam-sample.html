@@ -1,0 +1,50 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Video Effects SDK Web - Webcam Sample</title>
+  <meta name="description" content="Video Effects SDK Web - Webcam Sample">
+
+</head>
+
+<body>
+    <video id="videoElement" controls width="720" autoplay></video>
+    <script src="https://effectssdk.ai/sdk/web/3.4.3/tsvb-web.js"></script>
+    
+    <script>
+    
+        const sdk = new window.tsvb('{{CUSTOMER_ID}}');
+        console.log(sdk);
+
+        //activate webgpu computation
+        sdk.config({
+            provider: "webgpu"
+        });
+        
+        let video = document.getElementById('videoElement');
+    
+        sdk.onReady = () => {
+            console.log('SDK is ready let\'s run it');
+            sdk.run();
+            sdk.setBackgroundColor(0x00ff00);
+            sdk.setBackground('color'); //😎
+        }
+    
+        window.addEventListener('load', function () {
+            sdk.clear();
+            navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+                //set stream to sdk
+                sdk.useStream(stream);
+                //draw sdk results to canvas
+                //sdk.toCanvas(canvas);
+                //draw sdk results to MediaStream
+                video.srcObject = sdk.getStream();
+            });
+        })
+    
+    </script>
+</body>
+</html>

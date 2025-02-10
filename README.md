@@ -1,21 +1,153 @@
-# Video Effects SDK - Web Integration Sample
-Add real-time AI video enhancement that makes video meeting experience more effective and comfortable to your application in a few hours. 
+# Web Video Effects SDK
 
-Introducing our powerful and advanced web SDK for video communication products. With our web SDK, you can now elevate your video conferencing experience with features like background blur, virtual background, auto-framing or smart zoom, beautification, and automatic color correction.
+# Real-time AI-Powered Video Effects SDK
 
-Our background blur feature helps you maintain your privacy and professionalism during video calls by blurring out the background behind you. Virtual background takes it one step further by allowing you to replace your real background with a custom image or video of your choice.
+**Compatible with All Browsers and Effortlessly Integrates**
 
-With our auto-framing or smart zoom feature, you no longer have to worry about staying in frame during your video calls. Our SDK automatically adjusts the camera's field of view to keep you centered in the frame, even if you move around.
+Effortlessly integrate the most sought-after video effects into your product. Fully compatible with all browsers. Runs directly on user devices with CPU/GPU-optimized inference, delivering high-quality results. Easily incorporate custom processing or analytics in a single step.
 
-Our beautification feature enhances your appearance during video calls by smoothing out skin tones, removing blemishes, and adjusting lighting to create a more polished look. This feature is perfect for those who want to boost their confidence and create a professional appearance.
+### Perfect for:
+- **Video Conferencing Platforms**
+- **Live Streaming Solutions**
+- **Remote Work and Collaboration Tools**
+- **Social Media and Content Creation Apps**
+- **E-Learning and Online Education Platforms**
+- **Healthcare and Telemedicine Apps**
+- **Virtual Events and Webinars**
+- **Video Editing and Recording Software**
+- **Customer Support and Communication Tools**
 
-Finally, our automatic color correction feature adjusts the camera's color settings to improve the overall image quality, even in low-light environments or with poor quality cameras.
+## See it in Action
+- [AI Webcam Effects - Chrome Extension](https://chromewebstore.google.com/detail/ai-webcam-effects-+-recor/iedbphhbpflhgpihkcceocomcdnemcbj)
 
-Overall, our web SDK is the perfect solution for those looking to take their video conferencing experience to the next level. With advanced features like background blur, virtual background, auto-framing or smart zoom, beautification, and automatic color correction, you can create a professional and polished appearance during your video calls. Try our web SDK today and elevate your video conferencing experience.
+## Simple Online Demo
+- [Live Demo](https://effectssdk.ai/sdk/dev/demo-latest.html)
 
-Explore our Chrome Extension, built upon this Web SDK. You can effortlessly test all features and compatibility with your application without any integration hassle:
+## Features
 
-[![Watch the video](https://img.youtube.com/vi/KHBk3qwP2_I/hqdefault.jpg)](https://www.youtube.com/embed/KHBk3qwP2_I)
+- **Virtual Backgrounds**: Replace your background with any image or video for a polished, professional look.
+- **Desktop Capture Background**: Use your desktop screen as a dynamic background for creative presentations.
+- **Background Blur**: Keep the focus on you by blurring out distracting surroundings.
+- **Beautification & Touch-Up**: Enhance your appearance with real-time skin smoothing and touch-up effects.
+- **Auto Framing**: Stay perfectly centered in the frame with smart, automatic cropping.
+- **Auto Color Correction**: Achieve balanced, professional-grade colors in any lighting condition.
+- **Custom Layouts**: Arrange multiple video streams or elements for a clean, organized look.
+- **Professional Lower-Thirds**: Add titles, logos, and captions seamlessly to your videos.
+- **Video & Image Overlays**: Layer graphics, logos, or animations for branding and creativity.
+- **Color Filters (LUT-Based)**: Apply cinematic color grading with customizable LUT filters.
+- **Low-Light Mode**: Brighten and clarify videos in dimly lit environments.
+- **Video Clarity & Sharpness**: Enhance details and sharpness for crystal-clear video quality.
+
+## Trial Evaluation
+
+A Customer ID is required for the Effects SDK.
+
+To receive a new trial Customer ID, please fill out the contact form on the [effectssdk.ai](https://effectssdk.ai/request-trial) website.
+
+## NPM
+
+```terminal
+npm install effects-sdk
+```
+
+Usage of NPM package:
+
+```typescript
+
+import { tsvb } from 'effects-sdk';
+
+const sdk = new tsvb('{CUSTOMER_ID}');
+
+//versions of wasm files should be matched with SDK version
+sdk.config({
+    preset: 'balanced',
+    provider: 'webgpu',
+    wasmPaths: { 
+            'ort-wasm.wasm': 'https://effectssdk.ai/sdk/web/{VERSION}/ort-wasm.wasm',
+            'ort-wasm-simd.wasm': 'https://effectssdk.ai/sdk/web/{VERSION}/ort-wasm-simd.wasm'
+        }
+});
+
+sdk.preload();
+sdk.cache();
+
+```
+
+## Script Tag
+
+```javascript
+<script crossorigin="anonymous" src="https://effectssdk.ai/sdk/web/{VERSION}/tsvb-web.js"></script>
+```
+
+Usage of script tag instance:
+```javascript
+
+const sdk = new window.tsvb('{CUSTOMER_ID}');
+
+sdk.config({
+    preset: 'balanced',
+    provider: 'webgpu'
+});
+
+sdk.preload();
+sdk.cache();
+
+```
+
+## Usage with Webcam
+
+```javascript
+const sdk = new window.atsvb('{CUSTOMER_ID}');
+
+sdk.config({
+    preset: 'balanced',
+    provider: 'webgpu'
+});
+
+sdk.preload();
+sdk.cache();
+
+sdk.onError((e) => {
+    switch (e.type) {
+        case 'error':
+          console.error(e.message);
+          break;
+        case 'info':
+          console.log(e.message);
+          break;
+    }
+});
+
+let video = document.getElementById('videoElement');
+
+sdk.onReady = () => {
+    console.log('SDK is ready let\'s run it');
+    sdk.run();
+    sdk.setBackgroundColor(0x00ff00);
+    sdk.setBackground('color'); //😎
+};
+
+window.addEventListener('load', function () {
+    sdk.clear();
+    navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+        //set stream to sdk
+        sdk.useStream(stream);
+        //draw sdk results to canvas
+        //sdk.toCanvas(canvas);
+        //draw sdk results to MediaStream
+        video.srcObject = sdk.getStream();
+    });
+});
+
+```
+
+
+## Documentation
+- [API Reference](https://effectssdk.ai/sdk/web/docs/classes/tsvb.html)
+- [Feature Usage](docs/Features-Usage-Examples.md)
+- [Best Practices](docs/Best-Practices.md)
+- [Self Hosted Assets](docs/Self-Hosted-Assets.md)
+- [License Server for On-Premises Solutions](docs/License-Server-for-On-Premises-Solutions.md)
 
 ## Requirements
 
@@ -24,52 +156,3 @@ Explore our Chrome Extension, built upon this Web SDK. You can effortlessly test
 - Support of WebGL 2.0
 - WebGPU support (optional)
 
-## Documentation
-- [API Reference](https://effectssdk.ai/sdk/web/docs/classes/tsvb.html)
-- [Feature Usage](docs/Features-Usage-Examples.md)
-- [Best Practices](docs/Best-Practices.md)
-
-## Demo
-[Live Demo](https://effectssdk.ai/sdk/demo)
-
-## NPM Package
-[npm](https://www.npmjs.com/package/effects-sdk)
-
-## Chrome extension for end customers
-[AI Webcam Visual Effects: Google Meet & Other](https://chromewebstore.google.com/detail/ai-webcam-visual-effects/iedbphhbpflhgpihkcceocomcdnemcbj)
-
-
-
-For the best **quality** - disable **Frame Skipping** and use **Quality** segmentation preset
-
-For the best **performance** – enable **Frame Skipping** and use **Speed** segmentation preset
-
-## Obtaining Effects SDK Customer ID
-Effects SDK Customer ID is required to get SDK working.
-
-To receive a new trial Customer ID please fill in the contact form on [effectssdk.ai](https://effectssdk.ai/request-trial) website.
-
-## Technical Details
-
-- CUSTOMER_ID should be provided to the SDK constructor.
-- SDK has 4 speed/quality presets (different segmentationn models).
-- Segmentation supports WebGPU provider.
-- To improve output FPS SDK has ability to skip the frames.
-- [Self Hosted Assets](docs/Self-Hosted-Assets.md)
-- [License Server for On-Premises Solutions](docs/License-Server-for-On-Premises-Solutions.md)
-
-## Features
-
-- Virtual backgrounds (put image or video as a background) - **implemented**
-- Use Desktop Capture as a background - **implemented**
-- Background blur - **implemented**
-- Beautification/Touch up my appearance - **implemented**
-- Auto framing - **implemented**
-- Auto color correction - **implemented**
-- Layouts - **implemented**
-- One basic Lower-Third - **implemented**
-- Overlays - **implemented**
-- New Lower-Thirds (5) - **implemented**
-- Color filters - **implemented**
-- Low-light mode - **implemented**
-- Video clarity/Sharpness - **implemented**
