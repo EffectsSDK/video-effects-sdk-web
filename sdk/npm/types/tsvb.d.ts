@@ -3,7 +3,7 @@ import { type ColorFilterConfig } from "./effects/color-filter/colorFilterEffect
 import { BackgroundSource, LayoutMode } from "./effects/virtual-background/virtual_background_effect";
 import { type LowLightConfig } from "./effects/low-light/lowLightEffect";
 import { FaceCombiner } from "./effects/smart-zoom/faceCombiner";
-import { EffectProcessor } from "./effects/effect_processor";
+import { EffectProcessor } from "./effects/EffectProcessor";
 import { OverlayScreen, OverlayScreenOptions } from "./components/overlay-screen/overlayScreen";
 import { Watermark, WatermarkOptions } from "./components/watermark/watermark";
 import { StickerOptions, Stickers } from "./components/stickers/stickers";
@@ -128,6 +128,8 @@ export declare class tsvb {
     }[K];
     setOutputResolution(size: ResizeSettings): void;
     clearOutputResolution(): void;
+    setCustomResolution(size: ResizeSettings): void;
+    clearCustomResolution(): void;
     setOutputFrameFormat(format: FrameFormat): void;
     set onReady(f: Function);
     onError(f: (e: ErrorObject) => void): void;
@@ -136,6 +138,7 @@ export declare class tsvb {
     onAuthRequest(f?: (url: string, payload: Object) => Promise<string>): void;
     onColorFilterSuccess(f?: (id: string) => void): void;
     onLowLightSuccess(f?: () => void): void;
+    onBackgroundSuccess(f?: () => void): void;
 }
 declare const componentsMap: {
     overlay_screen: typeof OverlayScreen;

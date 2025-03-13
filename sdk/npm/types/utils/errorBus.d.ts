@@ -21,7 +21,8 @@ type ErrorObjectLight = Omit<ErrorObject, "type"> & {
 };
 export declare enum ErrorCode {
     GPU_DEVICE_LOST = 1001,
-    APP_CREATION_ISSUE = 1002
+    APP_CREATION_ISSUE = 1002,
+    GPU_UNCAPTUREDERROR = 1010
 }
 export declare enum ErrorType {
     INFO = "info",

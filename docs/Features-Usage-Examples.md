@@ -111,6 +111,15 @@ Clear the background:
 sdk.clearBackground();
 ```
 
+Handle the successful loading of the background:
+
+```
+sdk.onBackgroundSuccess(() => {
+   console.log('Background Successfully Applied')
+});
+
+```
+
 ## How to use Segmentation presets
 
 You can changa the segmentation preset on the fly:
