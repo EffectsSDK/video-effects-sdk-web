@@ -97,7 +97,7 @@ sdk.cache();
 ## Usage with Webcam
 
 ```javascript
-const sdk = new window.atsvb('{CUSTOMER_ID}');
+const sdk = new window.tsvb('{CUSTOMER_ID}');
 
 sdk.config({
     preset: 'balanced',
