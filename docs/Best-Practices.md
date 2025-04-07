@@ -5,37 +5,32 @@
   
   During the initialization stage, our SDK performs the following steps:
 
+  - Checking the configuration (apply default settingd and provided by sdk.config({}))
+  - Determines which effects/features should be added to the pipeline:
   - Determines which inferences are supported and loads the appropriate versions of .wasm files.
-  - Understands (based on the SDK config) which features should be enabled and loads all required .tsvb model files.
+  - Determines which ML files are supported and loads the appropriate versions of .tsvb files.
   - Sequentially initializes all models in memory (as required, they cannot be initialized simultaneously).
-  - Each ML feature must be authenticated by calling our license server during initialization.
+  - Each ML feature must be authenticated by calling our session server during initialization.
 
   By default, the initialization of the SDK starts only when you provide the stream to it.
   In some cases, it could take a significant amount of time (up to 15-20 seconds, depending on the network and environment conditions).
 
   We have introduced 2 methods aimed at improving the initialization speed.
 
-  1. [sdk.cache()](https://effectssdk.ai/sdk/web/docs/classes/tsvb.html#cache)
-    
-  - This method retrieves all required models (.tsvb) based on the sdk.config and stores them locally in named storage.
-  - You can call this immediately after the SDK instance was created.
-  - All loading works asynchronously and should not affect anything else.
-  - You can do this at the stage of initial loading of your application (not right before you receive the stream from the camera).
-  - This will significantly decrease the subsequent loading speed of the SDK.
+  1. [sdk.config()](https://effectssdk.ai/sdk/web/docs/classes/tsvb.html#config)
 
+  - This method is the central point for SDK configuration.
+  - If you're only using certain features and don't need the others, you should disable the unused ones.
+  - If a feature is disabled, this means that we will not load assets for these features, and SDK initialization will be faster.
+  - You can [dynamically load](https://effectssdk.ai/sdk/web/docs/classes/tsvb.html#loadEffect) other features that were not initialized at the beginning.
 
   2. [sdk.preload()](https://effectssdk.ai/sdk/web/docs/classes/tsvb.html#preload)
 
   - This method preloads and initializes all required models in memory and performs necessary authentication.
-  - If models are already cached (by `sdk.cache` or by browser cache), it will retrieve them from the cache.
-  - You can call this immediately after the SDK instance was created, so in this case, initialization will not depend on the webcam stream gathering.
+  - You can call this immediately after the sdk.config() method, so in this case, initialization will not depend on the webcam stream gathering.
   - We recommend doing this on the page where you are working with the camera.
 
-  3. [sdk.config()](https://effectssdk.ai/sdk/web/docs/classes/tsvb.html#config)
-
-  - This method is the central point for SDK configuration.
-  - If you are using only some features and don't require others, you need to disable them.
-  - If a feature is disabled, this means that we will not load assets for these features, and SDK initialization will be faster.
+  
 
 ## Performance improvements
 
@@ -46,10 +41,10 @@
    The most processing-intensive function is background segmentation. We have added support for WebGPU segmentation where available.
    If WebGPU is not supported by the browser, the SDK will automatically fall back to the CPU version of segmentation.
 
-   To enable it, configure it as follows:
+   It's enabled by default, to switch back to CPU configure it as follows:
 
     sdk.config({
-        provider: 'webgpu'
+        provider: 'wasm'
     });
 
 

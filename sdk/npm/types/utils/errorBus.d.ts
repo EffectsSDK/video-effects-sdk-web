@@ -1,11 +1,13 @@
-export type CallbackFunction = (n: ErrorObject) => void;
+export type ErrorHandler = (n: ErrorObject) => void;
 declare class _ErrorBus {
     private static _instance;
     static getInstance(): _ErrorBus;
-    private onErrorFunction?;
     private constructor();
-    subscribe(f: CallbackFunction): void;
-    notify(n: ErrorObjectLight): void;
+    messageLog: ErrorObject[];
+    private subscribers;
+    subscribe(handler: ErrorHandler): void;
+    unsubscribe(handler: ErrorHandler): void;
+    notify(error: ErrorObjectLight): void;
 }
 export declare const ErrorBus: _ErrorBus;
 export interface ErrorObject {
@@ -22,7 +24,21 @@ type ErrorObjectLight = Omit<ErrorObject, "type"> & {
 export declare enum ErrorCode {
     GPU_DEVICE_LOST = 1001,
     APP_CREATION_ISSUE = 1002,
-    GPU_UNCAPTUREDERROR = 1010
+    GPU_UNCAPTUREDERROR = 1010,
+    SESSION_INITIALIZATION_FAILED = 1020,
+    SESSION_INITIALIZATION_ISSUE = 1021,
+    LOADER_ISSUE = 1023,
+    PRESET_ISSUE = 1024,
+    SESSION_INITIALIZATION_SUCCESS = 3020,
+    MODEL_INITIALIZATION_ISSUE = 1022,
+    EFFECT_INITIALIZATION_ISSUE = 1025,
+    EFFECT_INITIALIZATION_SUCCESS = 3021,
+    NO_VIDEO_TRACK = 1030,
+    INFERENCE_RUN_ISSUE = 1040,
+    RENDERING_ISSUE = 1050,
+    ENQUEUE_FRAME_ISSUE = 1060,
+    READABLE_STREAM_ISSUE = 1061,
+    CPU_FALLBACK = 3001
 }
 export declare enum ErrorType {
     INFO = "info",
@@ -31,6 +47,7 @@ export declare enum ErrorType {
 }
 export declare enum ErrorEmitter {
     TSVB = "tsvb",
+    EMULATOR = "emulator",
     COMPONENTS_SYSTEM = "components_system",
     SRTEAM_PROCESSOR = "stream_processor",
     ML_INFERENCE = "ml_inference",
@@ -40,6 +57,7 @@ export declare enum ErrorEmitter {
     RENDERER = "renderer",
     RECORDER = "recorder",
     WORKER_TIMERS = "worker_timers",
+    ABSTRACT_EFFECT = "effects_loader",
     EFFECT_VIRTUAL_BACKGROUND = "effect_virtual_background",
     EFFECT_COLOR_CORRECTION = "effect_color_correction",
     EFFECT_COLOR_FILTER = "effect_color_filter",
