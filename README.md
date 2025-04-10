@@ -2,6 +2,10 @@
 
 # Real-time AI-Powered Video Effects SDK
 
+
+https://github.com/user-attachments/assets/782ad06d-d0fc-4590-8dc5-18703d41e7e7
+
+
 **Compatible with All Browsers and Effortlessly Integrates**
 
 Effortlessly integrate the most sought-after video effects into your product. Fully compatible with all browsers. Runs directly on user devices with CPU/GPU-optimized inference, delivering high-quality results. Easily incorporate custom processing or analytics in a single step.
