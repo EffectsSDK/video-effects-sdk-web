@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Video Effects SDK - Effects Management Example</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Rubik' rel='stylesheet'>
+
+    <style>
+      body {
+          font-family: 'Rubik';font-size: 16px;
+      }
+
+      @supports (-webkit-appearance: none) or (-moz-appearance: none) {
+        .checkbox-wrapper-14 input[type=checkbox] {
+          --active: #275EFE;
+          --active-inner: #fff;
+          --focus: 2px rgba(39, 94, 254, .3);
+          --border: #BBC1E1;
+          --border-hover: #275EFE;
+          --background: #fff;
+          --disabled: #F6F8FF;
+          --disabled-inner: #E1E6F9;
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          height: 21px;
+          outline: none;
+          display: inline-block;
+          vertical-align: top;
+          position: relative;
+          margin: 0;
+          cursor: pointer;
+          border: 1px solid var(--bc, var(--border));
+          background: var(--b, var(--background));
+          transition: background 0.3s, border-color 0.3s, box-shadow 0.2s;
+        }
+        .checkbox-wrapper-14 input[type=checkbox]:after {
+          content: "";
+          display: block;
+          left: 0;
+          top: 0;
+          position: absolute;
+          transition: transform var(--d-t, 0.3s) var(--d-t-e, ease), opacity var(--d-o, 0.2s);
+        }
+        .checkbox-wrapper-14 input[type=checkbox]:checked {
+          --b: var(--active);
+          --bc: var(--active);
+          --d-o: .3s;
+          --d-t: .6s;
+          --d-t-e: cubic-bezier(.2, .85, .32, 1.2);
+        }
+        .checkbox-wrapper-14 input[type=checkbox]:disabled {
+          --b: var(--disabled);
+          cursor: not-allowed;
+          opacity: 0.9;
+        }
+        .checkbox-wrapper-14 input[type=checkbox]:disabled:checked {
+          --b: var(--disabled-inner);
+          --bc: var(--border);
+        }
+        .checkbox-wrapper-14 input[type=checkbox]:disabled + label {
+          cursor: not-allowed;
+        }
+        .checkbox-wrapper-14 input[type=checkbox]:hover:not(:checked):not(:disabled) {
+          --bc: var(--border-hover);
+        }
+        .checkbox-wrapper-14 input[type=checkbox]:focus {
+          box-shadow: 0 0 0 var(--focus);
+        }
+        .checkbox-wrapper-14 input[type=checkbox]:not(.switch) {
+          width: 21px;
+        }
+        .checkbox-wrapper-14 input[type=checkbox]:not(.switch):after {
+          opacity: var(--o, 0);
+        }
+        .checkbox-wrapper-14 input[type=checkbox]:not(.switch):checked {
+          --o: 1;
+        }
+        .checkbox-wrapper-14 input[type=checkbox] + label {
+          display: inline-block;
+          vertical-align: middle;
+          cursor: pointer;
+          margin-left: 4px;
+        }
+    
+        .checkbox-wrapper-14 input[type=checkbox]:not(.switch) {
+          border-radius: 7px;
+        }
+        .checkbox-wrapper-14 input[type=checkbox]:not(.switch):after {
+          width: 5px;
+          height: 9px;
+          border: 2px solid var(--active-inner);
+          border-top: 0;
+          border-left: 0;
+          left: 7px;
+          top: 4px;
+          transform: rotate(var(--r, 20deg));
+        }
+        .checkbox-wrapper-14 input[type=checkbox]:not(.switch):checked {
+          --r: 43deg;
+        }
+        .checkbox-wrapper-14 input[type=checkbox].switch {
+          width: 38px;
+          border-radius: 11px;
+        }
+        .checkbox-wrapper-14 input[type=checkbox].switch:after {
+          left: 2px;
+          top: 2px;
+          border-radius: 50%;
+          width: 17px;
+          height: 17px;
+          background: var(--ab, var(--border));
+          transform: translateX(var(--x, 0));
+        }
+        .checkbox-wrapper-14 input[type=checkbox].switch:checked {
+          --ab: var(--active-inner);
+          --x: 17px;
+        }
+        .checkbox-wrapper-14 input[type=checkbox].switch:disabled:not(:checked):after {
+          opacity: 0.6;
+        }
+      }
+    
+      .checkbox-wrapper-14 * {
+        box-sizing: inherit;
+      }
+      .checkbox-wrapper-14 *:before,
+      .checkbox-wrapper-14 *:after {
+        box-sizing: inherit;
+      }
+      .checkbox-wrapper-14 {
+        margin-right: 20px;
+      }
+      
+      .controls {
+        position: relative;
+      }
+      .loader{
+          position: absolute;
+          top:0px;
+          right:0px;
+          width:100%;
+          height:100%;
+          background-color:#eceaea;
+          background-image:url('loader.gif');
+          background-size: 50px;
+          background-repeat:no-repeat;
+          background-position:center;
+          z-index:10000000;
+          opacity: 0.4;
+          filter: alpha(opacity=40);
+      }
+      .container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .controlSetOptions {
+        display: flex;
+      }
+
+      .controlSet {
+        padding: 15px;
+      }
+      
+  
+    </style>
+  </head>
+
+  
+  
+  <body>
+    <div class="container">
+      <video id="videoElement" controls width="720" autoplay></video>
+
+      <div class="controls">
+        <div id="loader" class="loader"></div>
+        <div class="controlSet">
+          <div class="controlSetName">
+            <h3>Effects SDK State</h3>
+          </div>
+          <div class="controlSetOptions">
+            <div class="checkbox-wrapper-14">
+              <input id="running" type="checkbox" class="switch">
+              <label for="running">Running</label>
+            </div>
+            <div class="checkbox-wrapper-14">
+              <input id="metrics" type="checkbox" class="switch">
+              <label for="metrics">FPS</label>
+            </div>
+            
+          </div>
+        </div>
+        <div class="controlSet">
+          <div class="controlSetName">
+            <h3>Background Options</h3>
+          </div>
+          <div class="controlSetOptions">
+            <div class="checkbox-wrapper-14">
+              <input id="backgroundImage" type="checkbox" class="switch">
+              <label for="backgroundImage">Image</label>
+            </div>
+            <div class="checkbox-wrapper-14">
+              <input id="backgroundVideo" type="checkbox" class="switch">
+              <label for="backgroundVideo">Video</label>
+            </div>
+            <div class="checkbox-wrapper-14">
+              <input id="backgroundColor" type="checkbox" class="switch">
+              <label for="backgroundColor">Color</label>
+            </div>
+            <div class="checkbox-wrapper-14">
+              <input id="backgroundBlur" type="checkbox" class="switch">
+              <label for="backgroundBlur">Blur</label>
+            </div>
+            <div class="checkbox-wrapper-14">
+              <input id="backgroundScreenCapture" type="checkbox" class="switch">
+              <label for="backgroundScreenCapture">Screen Capture</label>
+            </div>
+            </div>
+        </div>
+
+        <div class="controlSet">
+          <div class="controlSetName">
+            <h3>Video Enhancements</h3>
+          </div>
+          <div class="controlSetOptions">
+            <div class="checkbox-wrapper-14">
+              <input id="beautification" type="checkbox" class="switch">
+              <label for="beautification">Beautification</label>
+            </div>
+            <div class="checkbox-wrapper-14">
+              <input id="colorCorrection" type="checkbox" class="switch">
+              <label for="colorCorrection">Color Correction</label>
+            </div>
+            <div class="checkbox-wrapper-14">
+              <input id="colorFilter" type="checkbox" class="switch">
+              <label for="colorFilter">Color Filter</label>
+            </div>
+            <div class="checkbox-wrapper-14">
+              <input id="lowLight" type="checkbox" class="switch">
+              <label for="lowLight">Low-Light</label>
+            </div>
+            <div class="checkbox-wrapper-14">
+              <input id="sharpness" type="checkbox" class="switch">
+              <label for="sharpness">Sharpness</label>
+            </div>
+            <div class="checkbox-wrapper-14">
+              <input id="smartZoom" type="checkbox" class="switch">
+              <label for="smartZoom">Smart Zoom</label>
+            </div>
+            </div>
+        </div>
+
+        <div class="controlSet">
+          <div class="controlSetName">
+            <h3>Overlays & Effects</h3>
+          </div>
+          <div class="controlSetOptions">
+            <div class="checkbox-wrapper-14">
+              <input id="lowerThird" type="checkbox" class="switch">
+              <label for="lowerThird">Lower Third</label>
+            </div>
+            <div class="checkbox-wrapper-14">
+              <input id="mirroring" type="checkbox" class="switch">
+              <label for="mirroring">Mirroring</label>
+            </div>
+            <div class="checkbox-wrapper-14">
+              <input id="overlay" type="checkbox" class="switch">
+              <label for="overlay">Video Overlay</label>
+            </div>
+            <div class="checkbox-wrapper-14">
+              <input id="logo" type="checkbox" class="switch">
+              <label for="logo">Company Logo</label>
+            </div>
+            <div class="checkbox-wrapper-14">
+              <input id="sticker" type="checkbox" class="switch">
+              <label for="sticker">Sticker</label>
+            </div>
+            <div class="checkbox-wrapper-14">
+              <input id="emoji" type="checkbox" class="switch">
+              <label for="emoji">Emoji</label>
+            </div>
+            <div class="checkbox-wrapper-14">
+              <input id="freeze" type="checkbox" class="switch">
+              <label for="freeze">Freeze</label>
+            </div>  
+          </div>
+        </div>
+
+        <div class="controlSet">
+          <div class="controlSetName">
+            <h3>Layout Positions</h3>
+          </div>
+          <div class="controlSetOptions">
+            <div class="checkbox-wrapper-14">
+              <input id="left" type="checkbox" class="switch">
+              <label for="left">Left</label>
+            </div>
+            <div class="checkbox-wrapper-14">
+              <input id="right" type="checkbox" class="switch">
+              <label for="right">Right</label>
+            </div>
+            <div class="checkbox-wrapper-14">
+              <input id="bottomleft" type="checkbox" class="switch">
+              <label for="bottomleft">Bottom Left</label>
+            </div>
+            <div class="checkbox-wrapper-14">
+              <input id="bottomright" type="checkbox" class="switch">
+              <label for="bottomright">Bottom Right</label>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
