@@ -154,6 +154,10 @@ window.addEventListener('load', function () {
 - [Self Hosted Assets](docs/Self-Hosted-Assets.md)
 - [License Server for On-Premises Solutions](docs/License-Server-for-On-Premises-Solutions.md)
 
+## Integrations
+- [Electron with Native Inference](https://github.com/EffectsSDK/electron-integration-sample)
+- [LiveKit Web](https://github.com/EffectsSDK/livekit-js-integration)
+
 ## Requirements
 
 - Obtaining Effects SDK Customer ID
