@@ -1,5 +1,5 @@
 import { tsvb } from 'effects-sdk';
-import { EffectsStateManagement } from './EffectsStateManagement';
+import { EffectsStateManagement , LayoutMode } from './EffectsStateManagement';
 
 const sdk = new tsvb('{{CUSTOMER_ID}}');
 const manager = new EffectsStateManagement();
@@ -189,23 +189,23 @@ for (const [_key, value] of Object.entries(layoutPositions)) {
         if (el.checked) {
             uncheck(layoutPositions, el);
         } else {
-            await manager.apply(sdk, { layout: { type: "center" }});
+            await manager.apply(sdk, { layout: { type: LayoutMode.CENTER }});
             return;
         }
 
         loader.style.display = 'block';
         switch (el.id) {
             case 'left':
-                await manager.apply(sdk, { layout: { type: "left" } });
+                await manager.apply(sdk, { layout: { type: LayoutMode.LEFT } });
                 break;
             case 'right':
-                await manager.apply(sdk, { layout: { type: "right" } });
+                await manager.apply(sdk, { layout: { type: LayoutMode.RIGHT } });
                 break;
             case 'bottomleft':
-                await manager.apply(sdk, { layout: { type: "left-bottom" } });
+                await manager.apply(sdk, { layout: { type: LayoutMode.LFTBOTTOM } });
                 break;
             case 'bottomright':
-                await manager.apply(sdk, { layout: { type: "right-bottom"} });
+                await manager.apply(sdk, { layout: { type: LayoutMode.RIGHTBOTTOM } });
                 break;
         }
         loader.style.display = 'none';

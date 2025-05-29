@@ -1,6 +1,6 @@
 {
   "name": "effects-sdk",
-  "version": "3.5.3",
+  "version": "3.5.4",
   "description": "Add real-time AI video effects: virtual backgrounds, blur, touch-up, auto-framing, color correction, lower-thirds, and more. Works on all browsers for conferencing, streaming, and recording.",
   "main": "./tsvb.cjs",
   "module": "./tsvb.mjs",

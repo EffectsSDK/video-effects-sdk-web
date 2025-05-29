@@ -4,8 +4,17 @@
 
 import { tsvb } from 'effects-sdk';
 
+export enum LayoutMode {
+    CENTER = 'center',
+    LFTBOTTOM = 'left-bottom',
+    RIGHTBOTTOM = 'right-bottom',
+    LEFT = 'left',
+    RIGHT = 'right',
+    CUSTOM = 'custom',
+}
+
 export type LayoutConfig = {
-    type: "center" | "left-bottom" | "right-bottom" | "left" | "right" | "custom",
+    type: LayoutMode,
     xOffset?: number,
     yOffset?: number,
     size?: number,   
@@ -123,7 +132,7 @@ export class EffectsStateManagement {
         beautification: 0,
         sharpness: 0,
         layout: {
-            type: "center",
+            type: LayoutMode.CENTER,
             xOffset: 0,
             yOffset: 0,
             size: 1,
@@ -182,7 +191,6 @@ export class EffectsStateManagement {
     async apply(sdk: tsvb, state: Partial<EffectsStates>) {
         let feature: keyof Partial<EffectsStates>;
         for(feature in state) {
-            state[feature];
             switch(feature) { 
                 case 'running': { 
                    state[feature] ? sdk.run() : sdk.stop();
@@ -485,6 +493,6 @@ export class EffectsStateManagement {
     }
     
     clear(sdk: tsvb) {
-        this.apply(sdk, this.defaultStates);
+        this.apply(sdk, structuredClone(this.defaultStates));
     }
 }

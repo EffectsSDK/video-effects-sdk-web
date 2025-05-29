@@ -21,6 +21,8 @@ import { Options as sdkOptions } from "@/Options";
 import { type SharpnessConfig } from "./effects/sharpness/sharpnessEffect";
 import { PresetType } from "@/utils/preset";
 import { EffectsEnum } from "./effects/EffectFactory";
+import { ChromaKeySettings } from "@/effects/virtual-background/virtual_background_effect";
+export type { ChromaKeySettings };
 export type Metrics = {
     fps: number;
     segmentationInferenceTime: number;
@@ -74,6 +76,9 @@ export declare class tsvb {
     disableBeautification(): boolean;
     setBoundaryMode(mode: string): boolean;
     setBackgroundFitMode(mode: string): boolean;
+    enableChromaKey(): boolean;
+    disableChromaKey(): boolean;
+    setChromaKeySettings(setting: Partial<ChromaKeySettings>): boolean;
     setBoundaryLevel(level: number): boolean;
     setBeautificationLevel(level: number): boolean;
     setBlur(power: number): boolean;
@@ -180,4 +185,3 @@ interface ComponentArguments<K extends Keys> {
     component: SingleKey<K>;
     options?: K extends OptionsKeys ? Partial<OptionsMap[K]> : never;
 }
-export {};
