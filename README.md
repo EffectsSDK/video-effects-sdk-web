@@ -46,7 +46,7 @@ Effortlessly integrate the most sought-after video effects into your product. Fu
 
 A Customer ID is required for the Effects SDK.
 
-To receive a new trial Customer ID, please fill out the contact form on the [effectssdk.ai](https://effectssdk.ai/request-trial) website.
+To create a Customer ID, view pricing, and activate trials, please register on the developer portal here [effectssdk.ai](https://effectssdk.ai/cp/registration) website.
 
 ## NPM
 
@@ -66,6 +66,7 @@ const sdk = new tsvb('{CUSTOMER_ID}');
 sdk.config({
     preset: 'balanced',
     provider: 'webgpu',
+    test_inference: true,
     wasmPaths: { 
             'ort-wasm.wasm': 'https://effectssdk.ai/sdk/web/{VERSION}/ort-wasm.wasm',
             'ort-wasm-simd.wasm': 'https://effectssdk.ai/sdk/web/{VERSION}/ort-wasm-simd.wasm'
@@ -90,7 +91,8 @@ const sdk = new window.tsvb('{CUSTOMER_ID}');
 
 sdk.config({
     preset: 'balanced',
-    provider: 'webgpu'
+    provider: 'webgpu',
+    test_inference: true
 });
 
 sdk.preload();
@@ -105,7 +107,8 @@ const sdk = new window.tsvb('{CUSTOMER_ID}');
 
 sdk.config({
     preset: 'balanced',
-    provider: 'webgpu'
+    provider: 'webgpu',
+    test_inference: true
 });
 
 sdk.preload();
@@ -160,7 +163,8 @@ window.addEventListener('load', function () {
 
 ## Requirements
 
-- Obtaining Effects SDK Customer ID
-- SSL to get MediaStream from browser
-- Support of WebGL 2.0
+- Obtain an Effects SDK Customer ID
+- SSL certificate to access MediaStream from the browser
+- Enable Hardware Acceleration
+- Support for WebGL 2.0
 - WebGPU support (optional)
