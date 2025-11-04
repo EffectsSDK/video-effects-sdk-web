@@ -11,10 +11,12 @@ export declare abstract class Component {
     private beforeShowFunction;
     private beforeHideFunction;
     private afterHideFunction;
+    protected onLoadedFunction: Function;
     constructor(sdkOptions: sdkOptions, options?: Options);
     setOptions(options?: Options): void;
     show(): void;
     hide(): void;
+    onLoaded(f: Function): void;
     onBeforeShow(f: Function): void;
     onAfterShow(f: Function): void;
     onBeforeHide(f: Function): void;

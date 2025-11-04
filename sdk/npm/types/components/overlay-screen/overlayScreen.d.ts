@@ -13,7 +13,8 @@ export declare class OverlayScreen extends Component {
     private defaultOverlaySprite;
     private loadedOverlaySprite;
     private resource;
-    private isVideo;
+    isVideo: boolean;
+    isTransparent: boolean;
     private currentURL;
     private processedURL;
     constructor(sdkOptions: sdkOptions, options?: OverlayScreenOptions);
@@ -23,6 +24,7 @@ export declare class OverlayScreen extends Component {
     private initOverlayFromUrl;
     setOptions(o: OverlayScreenOptions): Promise<void>;
     private setOverlayImage;
+    private looksLikePNG;
     private loadImage;
     private switchVideoTexture;
 }
