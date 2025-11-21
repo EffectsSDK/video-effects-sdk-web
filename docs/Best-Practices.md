@@ -31,6 +31,29 @@
   - We recommend doing this on the page where you are working with the camera.
 
   
+## SDK instance usage
+
+We recommend using a single, global SDK instance (singleton):
+
+- Keep in mind that each SDK instance maintains all objects required for the processing pipeline in GPU memory.
+- Create the instance once and pass it to any component that needs to handle video processing.
+- When you are done with the previous stream, call `sdk.clear()` and then `sdk.useStream(newStream)` with the new stream.
+- If you need simultaneous processing (for example, a separate video preview), you can create a second instance and also manage it as a global object.
+
+### Temporarily removing the SDK (same browser session)
+
+If you need to remove the SDK and use it again later in the same browser session:
+
+- Always call `await sdk.destroy()`. This explicitly frees all GPU and CPU resources.
+- It does **not** affect the inference engine, so all loaded models remain in memory.
+- Re-initializing the SDK after this call will **not** trigger a new request to the session server.
+
+### Completely removing the SDK instance
+
+If you want to completely remove the SDK instance and do **not** plan to use it again in the current browser session:
+
+- Call `await sdk.destroy(true)`. This explicitly frees all GPU and CPU resources, **including** the inference engine and loaded models.
+
 
 ## Performance improvements
 

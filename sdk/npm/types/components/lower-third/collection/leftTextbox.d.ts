@@ -16,4 +16,5 @@ export declare class LtLeftTextbox extends LowerThird {
     private addSpriteMask;
     private addShowFunction;
     private addHideFunction;
+    destroy(): void;
 }

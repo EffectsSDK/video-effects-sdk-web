@@ -27,5 +27,6 @@ export declare class OverlayScreen extends Component {
     private looksLikePNG;
     private loadImage;
     private switchVideoTexture;
+    destroy(): void;
 }
 export {};

@@ -15,4 +15,5 @@ export declare class LtHorizontalMirror extends LowerThird {
     private createRectangles;
     private addShowFunction;
     private addHideFunction;
+    destroy(): void;
 }

@@ -34,5 +34,6 @@ export declare class StickerSprite {
     }): void;
     reset(): void;
     setSpriteSize(size?: number): void;
+    destroy(): void;
 }
 export {};

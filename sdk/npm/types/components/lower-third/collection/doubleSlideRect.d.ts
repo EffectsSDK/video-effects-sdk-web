@@ -17,4 +17,5 @@ export declare class LtDoubleSlideRect extends LowerThird {
     private createRectangles;
     private addShowFunction;
     private addHideFunction;
+    destroy(): void;
 }

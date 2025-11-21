@@ -5,6 +5,14 @@
  * @license  MIT
  */
 
+/*!
+ * pixi.js - v7.4.4
+ * Compiled Wed, 19 Nov 2025 09:32:44 UTC
+ *
+ * pixi.js is licensed under the MIT License.
+ * http://www.opensource.org/licenses/mit-license
+ */
+
 /*! Bundled license information:
 
 long/index.js:
@@ -28,6 +36,8 @@ long/index.js:
    * SPDX-License-Identifier: Apache-2.0
    *)
 */
+
+/*! https://mths.be/punycode v1.3.2 by @mathias */
 
 /*! https://mths.be/punycode v1.4.1 by @mathias */
 

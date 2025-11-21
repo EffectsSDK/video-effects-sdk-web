@@ -16,5 +16,6 @@ export declare class CountdownComponent extends Component {
     private drawText;
     showCountdown(): Promise<any>;
     hideCountdown(): void;
+    destroy(): void;
 }
 export {};

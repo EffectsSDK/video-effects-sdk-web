@@ -36,5 +36,6 @@ export declare class Stickers extends Component {
     private updateSpritePosition;
     private addSticker;
     private calcPosition;
+    destroy(): void;
 }
 export {};

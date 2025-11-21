@@ -15,4 +15,5 @@ export declare class Watermark extends Component {
     setPosition(position: ComponentPosition): void;
     clear(): void;
     render(): void;
+    destroy(): void;
 }

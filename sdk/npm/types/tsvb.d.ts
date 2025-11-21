@@ -36,6 +36,7 @@ export declare class tsvb {
     #private;
     private callbackStore;
     private streamProcessor;
+    private frameProcessor;
     private effectProcessor;
     private custom_inference;
     private onnx_inference;
@@ -43,6 +44,10 @@ export declare class tsvb {
     private effects;
     private _renderer?;
     private _lastErrorHandler?;
+    private _isReady;
+    private _readyPromise;
+    private _readyResolver?;
+    private _effectProcessorFullyLoaded;
     components: any;
     recorder: IRecorder;
     sdkOptions: sdkOptions;
@@ -57,6 +62,8 @@ export declare class tsvb {
     clearModelCache(): Promise<void>;
     preload(): Promise<void>;
     config(config: any): void;
+    initFrameProcessor(): Promise<void>;
+    processFrame(videoFrame: VideoFrame): Promise<VideoFrame>;
     private init;
     loadEffect(type: AvailableEffects): Promise<void>;
     getCustomerId(): string;
@@ -64,8 +71,8 @@ export declare class tsvb {
     setSegmentationPreset(preset: PresetType): Promise<boolean>;
     getSegmentationPreset(): PresetType;
     setBackgroundColor(color: number): void;
-    getStream(): MediaStream | null;
-    toCanvas(canvas: HTMLCanvasElement): void;
+    getStream(): MediaStream | null | undefined;
+    toCanvas(canvas: HTMLCanvasElement | null): void;
     setFpsLimit(limit: number): boolean;
     getMetrics(): Metrics;
     showFps(): boolean;
@@ -126,7 +133,7 @@ export declare class tsvb {
     stop(): boolean;
     enablePipelineSkipping(): void;
     disablePipelineSkipping(): void;
-    getEffectProcessor(): EffectProcessor;
+    getEffectProcessor(): EffectProcessor | null;
     createComponent<K extends Keys>(arg: K extends OptionsKeys ? ComponentArguments<K> : Omit<ComponentArguments<K>, "options">): ClassType<K>;
     addComponent<K extends Keys>(c: ClassType<K>, id: string): void;
     getComponentConstructor<K extends Keys>(key: K): {
@@ -154,6 +161,7 @@ export declare class tsvb {
     onColorFilterSuccess(f?: (id: string) => void): void;
     onLowLightSuccess(f?: () => void): void;
     onBackgroundSuccess(f?: () => void): void;
+    destroy(withInference?: boolean): Promise<boolean>;
 }
 declare const componentsMap: {
     overlay_screen: typeof OverlayScreen;

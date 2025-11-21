@@ -14,4 +14,5 @@ export declare class LtTwoSlideRects extends LowerThird {
     render(): void;
     private addShowFunction;
     private addHideFunction;
+    destroy(): void;
 }
