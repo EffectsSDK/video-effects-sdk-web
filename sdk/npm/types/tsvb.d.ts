@@ -1,6 +1,6 @@
 import { FrameFormat } from "./renderer/renderer";
 import { type ColorFilterConfig } from "./effects/color-filter/colorFilterEffect";
-import { BackgroundSource, LayoutMode } from "./effects/virtual-background/virtual_background_effect";
+import { BackgroundSource, LayoutMode, PortraitLightingOptions } from "./effects/virtual-background/virtual_background_effect";
 import { type LowLightConfig } from "./effects/low-light/lowLightEffect";
 import { FaceCombiner } from "./effects/smart-zoom/faceCombiner";
 import { EffectProcessor } from "./effects/EffectProcessor";
@@ -23,6 +23,7 @@ import { PresetType } from "@/utils/preset";
 import { EffectsEnum } from "./effects/EffectFactory";
 import { ChromaKeySettings } from "@/effects/virtual-background/virtual_background_effect";
 export type { ChromaKeySettings };
+export type { PortraitLightingOptions };
 export type Metrics = {
     fps: number;
     segmentationInferenceTime: number;
@@ -41,6 +42,7 @@ export declare class tsvb {
     private custom_inference;
     private onnx_inference;
     private outputFrameFormat;
+    private sdkInstanceId;
     private effects;
     private _renderer?;
     private _lastErrorHandler?;
@@ -79,6 +81,9 @@ export declare class tsvb {
     hideFps(): boolean;
     freeze(): boolean;
     unfreeze(): boolean;
+    enablePortraitLighting(): boolean;
+    disablePortraitLighting(): boolean;
+    setPortraitLightingOptions(options: PortraitLightingOptions): boolean;
     enableBeautification(): boolean;
     disableBeautification(): boolean;
     setBoundaryMode(mode: string): boolean;
