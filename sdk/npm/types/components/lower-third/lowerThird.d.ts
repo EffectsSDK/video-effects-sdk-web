@@ -1,6 +1,8 @@
-import { Graphics, Text, Ticker, TickerCallback } from "pixi.js";
+import { Ticker, TickerCallback } from "@/utils/worker-timers/ticker";
+import { Container, Graphics } from "../Container";
 import { Options as sdkOptions } from "@/Options";
 import { Component } from "../component";
+import { AspectRatio } from "@/engine/Renderer";
 export interface LtOptions {
     position?: Position;
     offset?: LtOffsetOptions;
@@ -34,10 +36,10 @@ interface LtFonts {
 }
 export declare abstract class LowerThird extends Component {
     ticker: Ticker;
-    showFunction: TickerCallback<any>;
-    hideFunction: TickerCallback<any>;
-    title: Text;
-    subtitle: Text;
+    showFunction: TickerCallback;
+    hideFunction: TickerCallback;
+    protected container: Container;
+    private fontLoader;
     fonts: LtFonts;
     isHideAnimationFinished: boolean;
     isShowing: boolean;
@@ -57,11 +59,12 @@ export declare abstract class LowerThird extends Component {
     offsetX(): number;
     offsetY(): number;
     strTrimAndEllipsis(str: string, maxLength: number): string;
-    showOffset(): void;
     drawRectPrimary(x: number, y: number, width: number, height: number): Graphics;
     drawRectSecondary(x: number, y: number, width: number, height: number): Graphics;
     fontFamily(key: "title" | "subtitle"): string | string[];
     loadFont(key: "title" | "subtitle", fontURL: string): Promise<void>;
+    get source(): Container;
+    get geometry(): AspectRatio;
     destroy(): void;
 }
 export {};

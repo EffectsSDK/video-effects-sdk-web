@@ -1,13 +1,23 @@
 import Player from "apng-js/types/library/player";
-import { Sprite } from "pixi.js";
 import { Options as sdkOptions } from '@/Options';
+import { MediaAssetLoader } from "@/utils/MediaAssetLoader";
+export declare class Sprite {
+    position: {
+        x: number;
+        y: number;
+    };
+    width: number;
+    height: number;
+    alpha: number;
+}
 interface StickerSpriteOptions {
     sprite: Sprite;
     id: string;
     player?: Player;
     canvas?: HTMLCanvasElement;
+    mediaAsset?: MediaAssetLoader;
     size?: number;
-    aminationPhase?: "showing" | "static" | "hiding";
+    animationPhase?: "showing" | "static" | "hiding";
     shrink: number;
 }
 export declare class StickerSprite {
@@ -16,10 +26,11 @@ export declare class StickerSprite {
     id: string;
     player?: Player;
     canvas?: HTMLCanvasElement;
+    mediaAsset?: MediaAssetLoader;
     alpha: number;
     height: number;
     width: number;
-    aminationPhase: "showing" | "static" | "hiding";
+    animationPhase: "showing" | "static" | "hiding";
     private sourceRatio;
     private sdkOptions;
     constructor(sdkOptions: sdkOptions, options: StickerSpriteOptions);
@@ -34,6 +45,8 @@ export declare class StickerSprite {
     }): void;
     reset(): void;
     setSpriteSize(size?: number): void;
+    play(): void;
+    stop(): void;
     destroy(): void;
 }
 export {};

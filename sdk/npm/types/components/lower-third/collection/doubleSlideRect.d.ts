@@ -1,6 +1,8 @@
 import { LowerThird, LtOptions } from "@/components/lower-third/lowerThird";
 import { Options as sdkOptions } from '@/Options';
 export declare class LtDoubleSlideRect extends LowerThird {
+    private title;
+    private subtitle;
     private titleContainer;
     private subtitleContainer;
     private rectFront;

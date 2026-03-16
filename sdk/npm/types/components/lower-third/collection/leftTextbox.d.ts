@@ -1,6 +1,8 @@
 import { LowerThird, LtOptions } from "@/components/lower-third/lowerThird";
 import { Options as sdkOptions } from '@/Options';
 export declare class LtLeftTextbox extends LowerThird {
+    private title;
+    private subtitle;
     private rectBack;
     private rectFront;
     private mask;

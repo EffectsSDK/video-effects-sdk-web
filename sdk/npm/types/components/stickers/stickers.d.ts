@@ -1,5 +1,7 @@
-import { Component } from "@/components/component";
+import { Component, ComponentGeometry } from "@/components/component";
 import { Options as sdkOptions } from "@/Options";
+import { AspectRatio } from "@/engine/Renderer";
+import { TextureSource } from "@/engine/Texture";
 export interface StickerOptions {
     capacity: number;
     ratio: number;
@@ -19,7 +21,7 @@ export declare class Stickers extends Component {
     options: StickerOptions;
     private spriteStore;
     private activeID;
-    private activeSticker;
+    private activeSticker?;
     private timerId;
     private ticker;
     private loadSuccesssFunc?;
@@ -30,6 +32,9 @@ export declare class Stickers extends Component {
     onLoadSucccess(f?: Function): void;
     onLoadError(f?: Function): void;
     setOptions(options: Partial<StickerOptions>): Promise<void>;
+    get source(): TextureSource | null;
+    get geometry(): AspectRatio | ComponentGeometry;
+    get alpha(): number | null;
     private selectSticker;
     private loadSticker;
     private animateSticker;

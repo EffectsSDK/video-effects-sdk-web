@@ -2,6 +2,8 @@ import { LowerThird, LtOptions } from "@/components/lower-third/lowerThird";
 import { Options as sdkOptions } from '@/Options';
 export declare class LtHorizontalMirror extends LowerThird {
     private isReady;
+    private title;
+    private subtitle;
     private middleLine;
     private titleContainer;
     private subtitleContainer;

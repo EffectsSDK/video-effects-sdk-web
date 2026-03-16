@@ -46,12 +46,10 @@ export declare class tsvb {
     private effects;
     private _renderer?;
     private _lastErrorHandler?;
-    private _isReady;
-    private _readyPromise;
-    private _readyResolver?;
     private _effectProcessorFullyLoaded;
     components: any;
     recorder: IRecorder;
+    private initWork;
     sdkOptions: sdkOptions;
     customer_id: string;
     constructor(customer_id: string, inference?: any);

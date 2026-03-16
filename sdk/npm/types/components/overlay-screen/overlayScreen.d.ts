@@ -1,5 +1,7 @@
 import { Component } from "@/components/component";
 import { Options as sdkOptions } from "@/Options";
+import { TextureSource } from "@/engine/Texture";
+import { AspectRatio } from "@/engine/Renderer";
 interface PromiseContainer {
     resolve: Function;
     reject: Function;
@@ -9,12 +11,7 @@ export interface OverlayScreenOptions {
     promise?: PromiseContainer;
 }
 export declare class OverlayScreen extends Component {
-    options: OverlayScreenOptions;
-    private defaultOverlaySprite;
-    private loadedOverlaySprite;
-    private resource;
-    isVideo: boolean;
-    isTransparent: boolean;
+    private assetLoader;
     private currentURL;
     private processedURL;
     constructor(sdkOptions: sdkOptions, options?: OverlayScreenOptions);
@@ -22,9 +19,10 @@ export declare class OverlayScreen extends Component {
     show(): void;
     hide(): void;
     private initOverlayFromUrl;
-    setOptions(o: OverlayScreenOptions): Promise<void>;
-    private setOverlayImage;
-    private looksLikePNG;
+    setOptions(o?: OverlayScreenOptions): void;
+    get source(): TextureSource | null;
+    get geometry(): AspectRatio;
+    get isOpaque(): boolean;
     private loadImage;
     private switchVideoTexture;
     destroy(): void;

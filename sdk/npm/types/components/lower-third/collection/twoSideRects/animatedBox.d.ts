@@ -1,5 +1,5 @@
 import { SmoothNumber } from "@/utils/functions/smoothNumber";
-import { Container } from "pixi.js";
+import { Container } from "../../../Container";
 import { Options as sdkOptions } from '@/Options';
 interface AnimatedBoxOptions {
     text?: string;
