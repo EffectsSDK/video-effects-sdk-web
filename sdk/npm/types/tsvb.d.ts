@@ -22,6 +22,7 @@ import { type SharpnessConfig } from "./effects/sharpness/sharpnessEffect";
 import { PresetType } from "@/utils/preset";
 import { EffectsEnum } from "./effects/EffectFactory";
 import { ChromaKeySettings } from "@/effects/virtual-background/virtual_background_effect";
+import { BackgroundOptions } from "./effects/virtual-background/Background";
 export type { ChromaKeySettings };
 export type { PortraitLightingOptions };
 export type Metrics = {
@@ -93,7 +94,7 @@ export declare class tsvb {
     setBeautificationLevel(level: number): boolean;
     setBlur(power: number): boolean;
     clearBlur(): boolean;
-    setBackground(url: BackgroundSource): boolean;
+    setBackground(url: BackgroundSource, options?: BackgroundOptions): boolean;
     clearBackground(): boolean;
     enableFrameSkipping(): boolean;
     disableFrameSkipping(): boolean;
