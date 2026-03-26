@@ -62,7 +62,9 @@ import { tsvb } from 'effects-sdk';
 
 const sdk = new tsvb('{CUSTOMER_ID}');
 
-//versions of wasm files should be matched with SDK version
+// The versions of the WASM files must match the SDK version.
+// IMPORTANT: wasmPaths must use full URLs.
+// Relative paths will not work for the CPU fallback.
 sdk.config({
     preset: 'balanced',
     provider: 'webgpu',
