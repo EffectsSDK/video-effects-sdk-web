@@ -26,6 +26,7 @@ Effortlessly integrate the most sought-after video effects into your product. Fu
 
 ## Simple Online Demo
 - [Live Demo](https://effectssdk.ai/sdk/dev/demo-latest.html)
+- [Avatars Demo](effectssdk.ai/sdk/dev/avatars.html)
 
 ## Features
 
@@ -154,6 +155,7 @@ window.addEventListener('load', function () {
 ## Documentation
 - [API Reference](https://effectssdk.ai/sdk/web/docs/classes/tsvb.html)
 - [Feature Usage](docs/Features-Usage-Examples.md)
+- [Avatars Usage](docs/Avatars.md)
 - [Best Practices](docs/Best-Practices.md)
 - [Error Handling](docs/General-Error-Handling.md)
 - [Self Hosted Assets](docs/Self-Hosted-Assets.md)

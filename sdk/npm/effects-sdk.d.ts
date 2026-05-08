@@ -4,6 +4,25 @@ declare interface AppendSticker {
     silenceMode?: boolean;
 }
 
+/**
+ * Options accepted by `loadAvatars` to configure the avatars effect.
+ *
+ * @public
+ */
+export declare interface AvatarsConfig {
+    /** URL of the avatar `.glb` model to load. */
+    modelUrl: string;
+    /** Three.js core and GLTFLoader (URLs or pre-loaded modules). */
+    threeJs: ThreeJS;
+    /** How much larger the avatar appears relative to the detected face. Default: 1.75. */
+    faceScaleFactor: number;
+    /**
+     * Optional overrides for the MediaPipe face-landmarker resources. Any
+     * field left unset falls back to the SDK's default CDN URLs.
+     */
+    faceLandmarker: Partial<FaceLandmarkerConfig>;
+}
+
 export declare interface BackgroundOptions {
     type?: string;
 }
@@ -239,7 +258,8 @@ export declare enum ErrorEmitter {
     EFFECT_COLOR_CORRECTION = "effect_color_correction",
     EFFECT_COLOR_FILTER = "effect_color_filter",
     EFFECT_SMART_ZOOM = "effect_smart_zoom",
-    EFFECT_LOW_LIGHT = "effect_low_light"
+    EFFECT_LOW_LIGHT = "effect_low_light",
+    EFFECT_AVATARS = "effect_avatars"
 }
 
 export declare interface ErrorObject {
@@ -280,6 +300,27 @@ export declare class FaceCombiner {
     };
     isEqual(sample: FaceCombiner, accuracity: number, canvasHeight?: number, canvasWidth?: number): boolean;
     setCoord(coord: Coord): void;
+}
+
+/**
+ * URLs of the MediaPipe Tasks Vision resources that power face detection for
+ * the avatars effect. The runtime loads them inside a Web Worker, so the
+ * `mediapipe` module must be reachable from the worker context.
+ *
+ * @public
+ */
+export declare interface FaceLandmarkerConfig {
+    /**
+     * URL of the MediaPipe Tasks Vision ESM module. Loaded by the worker via
+     * dynamic `import()` — must point to a module that exports `FaceLandmarker`
+     * and `FilesetResolver`. Default: `@mediapipe/tasks-vision@0.10.35` from
+     * the jsDelivr CDN.
+     */
+    mediapipe: string;
+    /** MediaPipe WASM base URL. Default: `@mediapipe/tasks-vision@0.10.35/wasm` from the jsDelivr CDN. */
+    wasm: string;
+    /** MediaPipe face landmarker model URL. Default: `face_landmarker.task` (float16, v1) from Google Storage. */
+    model: string;
 }
 
 export declare type FrameFormat = "RGBX" | "I420";
@@ -458,6 +499,20 @@ declare class Stickers extends Component {
     onLoadSucccess(f?: Function): void;
     onLoadError(f?: Function): void;
     setOptions(options: Partial<StickerOptions>): Promise<void>;
+}
+
+/**
+ * Three.js dependencies used by the avatars effect: the THREE core and the
+ * GLTFLoader add-on. Each entry accepts either a module URL (loaded
+ * dynamically) or a pre-imported module.
+ *
+ * @public
+ */
+export declare interface ThreeJS {
+    /** THREE.js URL or module. Default: `three@0.183.2` from the jsDelivr CDN. */
+    THREE: any;
+    /** GLTFLoader URL or module. Default: `three@0.183.2/examples/jsm/loaders/GLTFLoader.js` from the jsDelivr CDN. */
+    GLTFLoader: any;
 }
 
 /**
@@ -911,6 +966,51 @@ export declare class tsvb {
      * @param isOn - is a boolean argument (default false)
      */
     switchDrawPreFaceSquare(isOn: boolean): boolean;
+    /**
+     * Enable the Avatars effect.
+     * Call `loadAvatars()` first to supply the avatar model.
+     */
+    enableAvatars(): boolean;
+    /**
+     * Disable the Avatars effect.
+     */
+    disableAvatars(): boolean;
+    /**
+     * Load the resources required by the Avatars effect and the GLB avatar model if provided.
+     *
+     * Accepts either a model URL string or a partial config object. Config fields are merged
+     * over previously stored values. If neither argument supplies a `modelUrl`,
+     * the URL most recently provided is used (preloads resources only).
+     *
+     * Must be called after the SDK is ready (i.e. after `onReady` has fired).
+     *
+     * Resolves when resources is initialized and the effect is ready to render.
+     *
+     * @example
+     * ```typescript
+     * import * as THREE from 'three';
+     * import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+     *
+     * await sdk.loadAvatars({
+     *   modelUrl: 'https://example.com/avatar.glb',
+     *   threeJs: { THREE, GLTFLoader }, // Optional
+     * });
+     * sdk.enableAvatars();
+     * ```
+     */
+    loadAvatars(input?: string | Partial<AvatarsConfig>): Promise<void>;
+    /**
+     * Cancel any in-flight loading and release resources held by the
+     * Avatars effect. The configured model URL is preserved.
+     */
+    unloadAvatars(): void;
+    /**
+     * Update runtime-tunable Avatars options that do not require reloading
+     * resources.
+     */
+    setAvatarsOptions(options: {
+        faceScaleFactor?: number;
+    }): void;
     /**
      * Enable smart-zoom effect.
      */
