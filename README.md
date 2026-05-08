@@ -26,7 +26,7 @@ Effortlessly integrate the most sought-after video effects into your product. Fu
 
 ## Simple Online Demo
 - [Live Demo](https://effectssdk.ai/sdk/dev/demo-latest.html)
-- [Avatars Demo](effectssdk.ai/sdk/dev/avatars.html)
+- [Avatars Demo](https://effectssdk.ai/sdk/dev/avatars.html)
 
 ## Features
 
