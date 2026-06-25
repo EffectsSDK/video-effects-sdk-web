@@ -5,7 +5,7 @@
 In some environments, the WebGL context used by the SDK for rendering effects can be lost. This typically happens due to GPU driver crashes, operating system power management, or browser-specific resource handling.
 
 **Browser Specifics:**
-This issue primarily affects **Firefox** and **Safari**. Google Chrome utilizes a different internal approach to context management, and as a result, these specific recovery scenarios are rarely encountered in Chromium-based browsers.
+WebGL context loss can occur in any browser. What differs is the output-stream invalidation step of the recovery flow (`OUTPUT_STREAM_INVALIDATED`): it applies only to browsers that produce the output via `canvas.captureStream()`, such as **Firefox** and **Safari**. On **Chrome** and other Chromium-based browsers the output stream is not bound to the canvas, so that step does not occur there.
 
 ## Recovery Logic
 
@@ -38,6 +38,8 @@ One of the most important aspects of the recovery process is the **`OUTPUT_STREA
 
 **Why does this happen?**
 The SDK generates the output `MediaStream` (via `getStream()`) by capturing the stream from an internal HTML canvas. Because the `MediaStream` is logically bound to that specific canvas element, if the SDK is forced to destroy and rebuild the canvas to recover the WebGL context, the previous `MediaStream` becomes invalid.
+
+This applies to browsers that use `canvas.captureStream()` for output (e.g. Firefox/Safari). On Chrome and Chromium-based browsers the output stream is created differently and is not bound to the canvas, so `OUTPUT_STREAM_INVALIDATED` is not emitted there.
 
 **What you need to do:**
 When your application receives the `OUTPUT_STREAM_INVALIDATED` error, you **must** call `sdk.getStream()` again to obtain a new, valid stream and update your video element or peer connection.

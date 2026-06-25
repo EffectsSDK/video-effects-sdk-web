@@ -12,13 +12,12 @@ Example of assets structure:
     * model-1.2.1.tsvb
     * model-3.1.1.tsvb
     * model-4.0.1.tsvb
+    * model-5.5.0.tsvb
     * m-model-1.0.1.tsvb
-    * m-model-1.2.1.tsvb
     * m-model-3.1.1.tsvb
     * m-model-4.0.1.tsvb
-    * model-cc-1.0.0.tsvb
+    * m-model-5.5.0.tsvb
     * model-fd-1.1.0.tsvb
-    * model-ll-1.1.0.tsvb
   * ort-wasm.wasm
   * ort-wasm-simd.wasm
   * ort-wasm-simd.jsep.wasm

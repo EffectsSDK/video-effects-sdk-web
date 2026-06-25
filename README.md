@@ -70,6 +70,7 @@ sdk.config({
     preset: 'balanced',
     provider: 'webgpu',
     test_inference: true,
+    cache_models: true,
     wasmPaths: { 
             'ort-wasm.wasm': 'https://effectssdk.ai/sdk/web/{VERSION}/ort-wasm.wasm',
             'ort-wasm-simd.wasm': 'https://effectssdk.ai/sdk/web/{VERSION}/ort-wasm-simd.wasm'
@@ -77,7 +78,6 @@ sdk.config({
 });
 
 sdk.preload();
-sdk.cache();
 
 ```
 
@@ -95,11 +95,11 @@ const sdk = new window.tsvb('{CUSTOMER_ID}');
 sdk.config({
     preset: 'balanced',
     provider: 'webgpu',
-    test_inference: true
+    test_inference: true,
+    cache_models: true
 });
 
 sdk.preload();
-sdk.cache();
 
 ```
 
@@ -111,11 +111,11 @@ const sdk = new window.tsvb('{CUSTOMER_ID}');
 sdk.config({
     preset: 'balanced',
     provider: 'webgpu',
-    test_inference: true
+    test_inference: true,
+    cache_models: true
 });
 
 sdk.preload();
-sdk.cache();
 
 sdk.onError((e) => {
     switch (e.type) {
@@ -134,7 +134,7 @@ sdk.onReady = () => {
     console.log('SDK is ready let\'s run it');
     sdk.run();
     sdk.setBackgroundColor(0x00ff00);
-    sdk.setBackground('color'); //😎
+    sdk.setBackground('color');
 };
 
 window.addEventListener('load', function () {

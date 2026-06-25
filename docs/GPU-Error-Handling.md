@@ -10,7 +10,7 @@ The Effects SDK, by default, attempts to infer ML models (particularly segmentat
 
 ## Automatic fallback to WASM
 
-If a GPU error occurs **mid-session** while the segmentation pipeline is running on WebGPU, the SDK **automatically falls back to the WebAssembly (WASM) CPU backend**. On such an error the SDK releases the GPU inference session and re-initializes the running segmentation pipeline on WASM — **no application action is required to recover**.
+If a GPU error occurs **mid-session** while the segmentation pipeline is running on WebGPU, the SDK **automatically falls back to the WebAssembly (WASM) CPU backend**. On such an error the SDK releases the GPU inference session and re-initializes the running segmentation pipeline on WASM - **no application action is required to recover**.
 
 The auto-fallback is triggered by any of the following:
 
@@ -21,6 +21,18 @@ The auto-fallback is triggered by any of the following:
 When the SDK performs the fallback, it emits an informational event with the code `ErrorCode.CPU_FALLBACK`.
 
 > The automatic WASM fallback is currently implemented for the Background Blur/Replacement (segmentation) effect. The Avatars effect uses a separate ML stack (MediaPipe) that selects a CPU delegate at initialization when the GPU delegate is unavailable, surfaced as a warning event. Other effects do not use WebGPU.
+
+## Manual switch to WASM
+
+Besides the automatic fallback, you can switch the running segmentation pipeline from WebGPU to the WASM CPU backend **on demand**, without waiting for a GPU error. This is useful when your application has already decided the GPU path is unreliable - for example after observing repeated GPU events earlier in the session - and wants to switch proactively.
+
+```js
+await sdk.setProvider({ model: 'segmentation', provider: 'wasm' });
+```
+
+The call releases the active GPU inference session and re-initializes the segmentation pipeline on WASM - the same transition the automatic fallback performs, so expect the same brief, one-time processing hiccup while the WASM session is created.
+
+Currently only `model: 'segmentation'` with `provider: 'wasm'` (WebGPU -> CPU) is supported.
 
 ## Recommended application handling (optional)
 
@@ -44,7 +56,7 @@ Using `provider: "auto"` lets the SDK pick WebGPU when available and fall back t
 export enum ErrorCode {
   GPU_DEVICE_LOST = 1001,        // ErrorType.ERROR
   GPU_UNCAPTUREDERROR = 1010,    // ErrorType.ERROR
-  CPU_FALLBACK = 3001,           // ErrorType.INFO — emitted when the SDK falls back to WASM
+  CPU_FALLBACK = 3001,           // ErrorType.INFO - emitted when the SDK falls back to WASM
 }
 
 export interface ErrorObject {
@@ -60,7 +72,7 @@ export interface ErrorObject {
 sdk.onError((error) => {
   if (error?.code === ErrorCode.GPU_DEVICE_LOST || error?.code === ErrorCode.GPU_UNCAPTUREDERROR) {
     // GPU error detected. The SDK is automatically switching the
-    // segmentation pipeline to the WASM backend — no action required.
+    // segmentation pipeline to the WASM backend - no action required.
   }
 
   if (error?.code === ErrorCode.CPU_FALLBACK) {
@@ -72,4 +84,8 @@ sdk.onError((error) => {
 sdk.config({
   provider: "webgpu" | "wasm" | "auto",
 });
+
+
+// Manual, mid-session switch of the segmentation pipeline to WASM:
+await sdk.setProvider({ model: "segmentation", provider: "wasm" });
 ```

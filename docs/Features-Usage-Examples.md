@@ -55,12 +55,12 @@ SDK has ability to subscribe to an input resolution change event.
 
 ```javascript
 sdk.onChangeInputResolution(() => {
-   console.log("The input resolution has beed changed...");
+   console.log("The input resolution has been changed...");
    ...
 })
 ```
 
-This method can be usefull in cases where browser changes stream videoTrack resolution on the fly (rotation the screen of mobile devices and ect.)
+This method can be useful in cases where browser changes stream videoTrack resolution on the fly (rotation the screen of mobile devices and etc.)
 
 ## ErrorBus
 
@@ -82,8 +82,10 @@ ErrorObject contains the following fields:
 - type: error type - ErrorType enum (typescript case) or "info" | "warning" | "error" string (javascript);
 - data: optional field, can contain additional info;
 
+The `code`, `emitter` and `cause` fields are also available - see [Error Handling](./General-Error-Handling.md) for details.
+
 **Note on GPU Stability:** 
-In some browsers (especially Firefox and Safari), the WebGL context can be lost due to system or driver issues. Handling these cases is critical for production stability. For detailed instructions on how to recover the rendering pipeline and handle stream invalidation, please refer to the [WebGL Context Loss and Recovery](./WebGL-Context-Loss-and-Recovery.md) guide.
+The WebGL context can be lost due to system or driver issues. Handling these cases is critical for production stability. For detailed instructions on how to recover the rendering pipeline and handle stream invalidation, please refer to the [WebGL Context Loss and Recovery](./WebGL-Context-Loss-and-Recovery.md) guide.
 
 In typescript projects you can use enum syntax:
 
@@ -148,7 +150,7 @@ sdk.onBackgroundSuccess(() => {
 
 ## How to use Segmentation presets
 
-You can changa the segmentation preset on the fly:
+You can change the segmentation preset on the fly:
 
 ```javascript
 sdk.setSegmentationPreset('quality');
@@ -213,7 +215,7 @@ Enable beautification:
 ```javascript
 sdk.enableBeautification();
 
-//you can chamnge the power of effects on the fly
+//you can change the power of effects on the fly
 sdk.setBeautificationLevel(0.6);
 ```
 
@@ -372,19 +374,15 @@ ColorFilter state management:
 sdk.setColorFilterConfig(config: Partial<ColorFilterConfig>);
 ```
 
-ColorFilterConfig has folowing properties (all optional):
+ColorFilterConfig has following properties (all optional):
 
-- part: number from 0 to 1 - allow to aply the effect to part of the frame (dev feature, default value is 1)
+- part: number from 0 to 1 - allow to apply the effect to part of the frame (dev feature, default value is 1)
 - power: number from 0 to 1 - set effect power
 - lut: url or CUBE file - lut source, should contain valid CUBE file or url of valid CUBE file
 - capacity: number of loaded luts the effect caches (default value is 1)
-- promise: object containing one function(resolve), that can be used after lut success applying
+- promise: object with `resolve` and `reject` functions - per-call notifier for the LUT load triggered by this `setColorFilterConfig` call. `reject` is called with an error if the LUT fails to load. `resolve` is called once the LUT has finished loading. Note that `resolve` only confirms the LUT was **loaded** - it does not guarantee this LUT is the one currently on screen, because a later `setColorFilterConfig` call with a different LUT can supersede it. If the call carries no `lut` (e.g. you only change `power`), `resolve` is called immediately.
 
-You can also pass common onSuccess callback, using following method:
-
-```typescript
-sdk.onColorFilterSuccess(f: () => void);
-```
+`setColorFilterConfig` returns a `boolean`. It returns `false` when the color-filter effect is not available - in that case the config is not applied and the supplied `promise` is **never** settled. Guard against it when you rely on the promise.
 
 Disable ColorFilter effect:
 
@@ -392,16 +390,21 @@ Disable ColorFilter effect:
 sdk.disableColorFilter();
 ```
 
-Lut applying example:
+Lut applying example. The recommended pattern is to wrap the call in a promise and reject up front when the effect is not available, so the returned promise always settles:
 
 ```javascript
-sdk.onColorFilterSuccess(() => {
-   console.log('Lut successfully applied!');
-});
+function applyColorFilter(sdk, config) {
+   return new Promise((resolve, reject) => {
+      const applied = sdk.setColorFilterConfig({
+         ...config,
+         promise: { resolve, reject }
+      });
+      if (!applied) reject(new Error('color-filter effect is not available'));
+   });
+}
 
-sdk.setColorFilterConfig({
-   lut: 'https://lut_storage.com/my_lut.cube'
-});
+await applyColorFilter(sdk, { lut: 'https://lut_storage.com/my_lut.cube' });
+console.log('Lut successfully loaded!');
 ```
 
 Set ColorFilter power:
@@ -456,7 +459,7 @@ sdk.setChromaKeySettings({
 
 ## Components system
 
-Imagine an artist drawing a animation. He draws individual elements on transparent sheets, overlaying them layer by layer, to get the finished frame. We have implemented a similar concept with Components system. Component - is the frame layer, that contain the specialized element.
+Imagine an artist drawing an animation. He draws individual elements on transparent sheets, overlaying them layer by layer, to get the finished frame. We have implemented a similar concept with Components system. Component - is the frame layer, that contain the specialized element.
 
 You can create the component you need:
 
@@ -468,7 +471,7 @@ const newComponent_1 = sdk.createComponent({
 ```
 
 Available components: <i>"overlay_screen", "stickers", "lowerthird_1", "lowerthird_2", "lowerthird_3", "lowerthird_4", "lowerthird_5"</i>.
-Add the created component to the frame in the order you want with unique ID that is needed to access the component. In this case <i>newComponent_2</i> will be dysplayed on top of the <i>newComponent_1</i>.
+Add the created component to the frame in the order you want with unique ID that is needed to access the component. In this case <i>newComponent_2</i> will be displayed on top of the <i>newComponent_1</i>.
 
 ```javascript
 sdk.addComponent(newComponent_2, "component_id_2");
@@ -526,7 +529,7 @@ You can pass to Overlay Component following options:
 
 ### How to use Stickers
 
-To use Stikers, you need to create new component by selecting the "stickers" type and pass necessary options. Then add it to the list of components:
+To use Stickers, you need to create new component by selecting the "stickers" type and pass necessary options. Then add it to the list of components:
 
 ```javascript
 const stickers = sdk.createComponent({
@@ -562,7 +565,7 @@ sdk.components.my_stickers_component.onLoadSucccess(() => {
 });
 ```
 
-After that you can add loaded sticker to the frame by the setting option <i>id</i> (Note that sticker unique <i>id</i> is the <i>url</i>, taht was used for the texture loading):
+After that you can add loaded sticker to the frame by the setting option <i>id</i> (Note that sticker unique <i>id</i> is the <i>url</i>, that was used for the texture loading):
 
 ```javascript
 sdk.components.my_stickers_component.setOptions({
@@ -611,9 +614,9 @@ sdk.components.lowerthird.hideLowerThird();
 ## How to resize stream on the fly
 
 ```typescript
-sdk.setOutputResolution({
-   width?: number,
-   height?: number
+sdk.setCustomResolution({
+   width: number,
+   height: number
 });
 ```
 

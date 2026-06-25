@@ -22,12 +22,32 @@ export interface ErrorObject {
 }
 ```
 
+### SdkError
+
+Besides the `onError` callback (which delivers `info`/`warning`/`error` events), some asynchronous methods - such as `loadEffect()` - **reject their returned promise** when they fail, rather than only emitting an event. The rejection value is an `SdkError`: an `Error` subclass that carries the same fields as an `onError` event (`code`, `emitter`, `data`, and the underlying `errorCause`). It is exported from the SDK and you never construct it yourself - catch it and use `instanceof`:
+
+```js
+import { tsvb, SdkError } from 'effects-sdk';
+
+try {
+  await sdk.loadEffect('virtual_background');
+} catch (e) {
+  if (e instanceof SdkError) {
+    console.error(e.code, e.message, e.data);
+    // e.g. fall back to the original, unprocessed stream
+  }
+}
+```
+
+When the SDK handles such a failure internally (so it does not reject a public call - e.g. during automatic initialization), it forwards the error to `onError` instead. The same failure is therefore always observable through exactly one channel - the promise rejection or the `onError` event - and never silently dropped.
+
 ### List of Available Codes
 
 ```typescript
 export enum ErrorCode {
   // INFO - Success and Fallback notifications
   CPU_FALLBACK = 3001, // The SDK is falling back to CPU WASM mode due to a WebGPU error or lack of support
+  TEST_INFERENCE_PASSED = 1015, // Inference consistency test (config `test_inference`) passed
   SESSION_INITIALIZATION_SUCCESS = 3020, // ML model session was successfully initialized
   EFFECT_INITIALIZATION_SUCCESS = 3021, // Effects with ML functionality were successfully initialized
   RENDER_CONTEXT_RESTORED = 3031, // WebGL context was automatically restored by the browser
@@ -43,6 +63,7 @@ export enum ErrorCode {
   // ERROR - GPU and Context Lifecycle
   GPU_DEVICE_LOST = 1001, // GPU device lost due to driver crash or manual destruction
   GPU_UNCAPTUREDERROR = 1010, // Uncaptured errors from the GPU detected
+  GPU_INFERENCE_INCONSISTENCY = 1011, // WebGPU inference produced inconsistent results; SDK falls back to CPU WASM
   RENDER_CONTEXT_LOST = 3030, // WebGL context lost; recovery process started
   RENDER_CONTEXT_REBUILD_FAILED = 1063, // All attempts to rebuild the canvas failed
 
@@ -53,10 +74,14 @@ export enum ErrorCode {
   EFFECT_INITIALIZATION_ISSUE = 1025, // Error during effect initialization
 
   // ERROR - Runtime Processing Issues
+  CPU_INFERENCE_INCONSISTENCY = 1012, // CPU WASM inference produced inconsistent results in the consistency test
   INFERENCE_RUN_ISSUE = 1040, // Error captured while running ML models at runtime
   RENDERING_ISSUE = 1050, // Error occurred during runtime rendering
   ENQUEUE_FRAME_ISSUE = 1060, // Error during frame enqueueing
   READABLE_STREAM_ISSUE = 1061, // Error reading the input stream
+
+  // ERROR - Environment / Capability
+  SOFTWARE_RENDERER_SKIPPED = 1064, // Software WebGL renderer detected; effects are skipped. Set config `allow_software_renderer: true` to run effects anyway.
 }
 ```
 
@@ -69,13 +94,26 @@ APP_CREATION_ISSUE = 1002
 SESSION_INITIALIZATION_FAILED = 1020
 SESSION_INITIALIZATION_ISSUE = 1021
 NO_VIDEO_TRACK = 1030
+RENDER_CONTEXT_REBUILD_FAILED = 1063
+OUTPUT_STREAM_INVALIDATED = 1062 // recoverable: call getStream() again to obtain a fresh output stream
+```
+
+`APP_CREATION_ISSUE` is also emitted when the browser/device does not support WebGL at all. The SDK renders exclusively through WebGL - there is no CPU or non-WebGL rendering pipeline - so without WebGL it cannot apply effects or draw anything. This is not recoverable inside the SDK; you should fall back to the original, unprocessed stream.
+
+To detect this up front, call `isSupported()` on the SDK instance before you start processing - it returns `false` when WebGL is unavailable (and also on a software renderer). If it returns `false`, use the original stream without the SDK instead of starting the pipeline:
+
+```js
+const sdk = new tsvb('CUSTOMER_ID');
+if (!sdk.isSupported()) {
+  // WebGL unavailable or software renderer - use the original stream as-is.
+}
 ```
 
 ### Temporary Issues 
 
-These are less critical issues that may be temporary. For example, you might encounter errors during inference while the SDK is falling back to the CPU WASM provider due to a WebGPU issue. We recommend monitoring these errors over time; if they persist for more than 2–3 seconds, it likely indicates a persistent issue, and you should consider disabling the SDK or bypassing the original stream.
+These are less critical issues that may be temporary. For example, you might encounter errors during inference while the SDK is falling back to the CPU WASM provider due to a WebGPU issue. We recommend monitoring these errors over time; if they persist for more than 2-3 seconds, it likely indicates a persistent issue, and you should consider disabling the SDK or bypassing the original stream.
 
-If the WebGL context is lost, the SDK initiates a recovery process. You may encounter a sequence of notifications starting with `RENDER_CONTEXT_LOST` and ending with either a success (`RENDER_CONTEXT_REBUILT`, `RENDER_CONTEXT_RESTORED`) or a failure (`RENDER_CONTEXT_REBUILD_FAILED`). Unlike inference errors, context recovery is event-driven; we recommend waiting for the final recovery event as the definitive indicator of the issue's status rather than relying on a time limit. 
+If the WebGL context is lost, the SDK initiates a recovery process. You may encounter a sequence of notifications starting with `RENDER_CONTEXT_LOST` and ending with either a success (`RENDER_CONTEXT_REBUILT`, `RENDER_CONTEXT_RESTORED`) or a failure (`RENDER_CONTEXT_REBUILD_FAILED`). Unlike inference errors, context recovery is event-driven; we recommend waiting for the final recovery event as the definitive indicator of the issue's status rather than relying on a time limit. `OUTPUT_STREAM_INVALIDATED` is also part of this flow, but it is not emitted on Chrome and Chromium-based browsers, due to their different output stream creation mechanism. 
 
 For a detailed explanation of the recovery logic and how to handle stream invalidation, please refer to the [WebGL Context Loss and Recovery](./WebGL-Context-Loss-and-Recovery.md) guide.
 
@@ -88,6 +126,20 @@ RENDERING_ISSUE = 1050
 ENQUEUE_FRAME_ISSUE = 1060
 READABLE_STREAM_ISSUE = 1061
 ```
+
+### Software Renderer
+
+If the browser exposes only a software (non hardware-accelerated) WebGL renderer, the heavy ML effects (blur, background replacement, beautification) cannot run adequately. In that case the SDK skips the effect pipeline and emits `SOFTWARE_RENDERER_SKIPPED` once.
+
+This is **not** a fatal error: the SDK keeps producing a valid output stream. The input frame and the components (overlays, lower-thirds) are still rendered - only the effects are skipped.
+
+If you want to run the effects on a software renderer anyway (accepting the low performance), opt in via config before initialization:
+
+```typescript
+sdk.config({ allow_software_renderer: true });
+```
+
+You can also detect a software renderer up front with `sdk.isSupported()`, which returns `false` on a software renderer.
 
 ### Effect-Specific Errors
 

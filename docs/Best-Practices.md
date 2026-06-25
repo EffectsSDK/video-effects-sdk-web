@@ -5,7 +5,7 @@
   
   During the initialization stage, our SDK performs the following steps:
 
-  - Checking the configuration (apply default settingd and provided by sdk.config({}))
+  - Checking the configuration (apply default settings and provided by sdk.config({}))
   - Determines which effects/features should be added to the pipeline:
   - Determines which inferences are supported and loads the appropriate versions of .wasm files.
   - Determines which ML files are supported and loads the appropriate versions of .tsvb files.

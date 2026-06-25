@@ -133,7 +133,7 @@ sdk.onReady = () => {
     console.log('SDK is ready let\'s run it');
     sdk.run();
     sdk.setBackgroundColor(0x00ff00);
-    sdk.setBackground('color'); //😎
+    sdk.setBackground('color');
 };
 
 window.addEventListener('load', function () {
