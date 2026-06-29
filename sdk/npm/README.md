@@ -41,6 +41,8 @@ Effortlessly integrate the most sought-after video effects into your product. Fu
 - **Color Filters (LUT-Based)**: Apply cinematic color grading with customizable LUT filters.
 - **Low-Light Mode**: Brighten and clarify videos in dimly lit environments.
 - **Video Clarity & Sharpness**: Enhance details and sharpness for crystal-clear video quality.
+- **3D Head Avatars**: Transform yourself into a real-time 3D avatar while preserving facial expressions and head movement.
+- **Custom Lower-Thirds & Captions**: Customize fonts, styles, colors, layouts, and animations to match your brand or presentation style.
 
 ## Trial Evaluation
 

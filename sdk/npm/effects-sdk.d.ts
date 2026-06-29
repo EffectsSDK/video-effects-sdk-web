@@ -1,3 +1,52 @@
+declare type AbsoluteDuration = `${number}ms` | `${number}s`;
+
+declare type AnimatableProperty = PositionalProperty | ScalarProperty | ColorProperty;
+
+/**
+ * How a phase's animation ended, passed to {@link AnimationPhase.onComplete}:
+ *  - `"show"`        -> finished playing forward as a show.
+ *  - `"hide"`        -> finished as a hide (an authored hide played forward,
+ *                       or the implicit hide that replays `show` backwards).
+ *  - `"interrupted"` -> cut short before reaching its end (a new show/hide
+ *                       took over, or the overlay was torn down).
+ */
+declare type AnimationEnd = "show" | "hide" | "interrupted";
+
+/**
+ * Animation phase. Rules (applied to both `show` and `hide`):
+ *
+ *  - **Unique target property.** At most one tween per (target node, property)
+ *    pair in a phase. A second one is a load-time error.
+ *  - **Target must exist.** `target` must resolve to a node `id` in the tree
+ *    at load time, otherwise the overlay fails to register.
+ *  - **Empty tween is a no-op.** A tween with neither explicit `from` nor
+ *    `to` and whose implicit values coincide silently does nothing.
+ *  - **`duration: 0` is allowed.** Instant snap to `to` at `delay` time;
+ *    property then stays at `to` for the rest of the phase.
+ *  - **Settle to base on phase end.** When the phase finishes, every
+ *    tweened property snaps to the node's declared base value from
+ *    `OverlayDefinition` - even if the tween's explicit `to` was
+ *    different. The base value (mutated by `patch()`) is the canonical
+ *    resting state; `to` is only a trajectory target during the phase.
+ *  - **Patch during phase.** Calls to `patch()` that land while a tween is
+ *    in flight do **not** retarget the tween - neither its explicit nor
+ *    implicit `to` is re-resolved. The patched base takes effect at the
+ *    phase-end settle (see above) and on the next phase.
+ */
+declare interface AnimationPhase {
+    /** Total length of the phase. Relative tweens are fractions of this. */
+    duration: AbsoluteDuration;
+    tweens: Tween[];
+    /**
+     * Called when the phase's animation ends. The argument reports how it ended - `"show"`, `"hide"`, or
+     * `"interrupted"` (see {@link AnimationEnd}). Because an omitted `hide`
+     * replays the `show` phase backwards, a `show` phase's `onComplete` fires
+     * with `"hide"` when that reverse finishes, and with `"interrupted"` if a
+     * `show` is cut short by a `hide` (then again when the hide ends).
+     */
+    onComplete?: (reason: AnimationEnd) => void;
+}
+
 declare interface AppendSticker {
     url: string;
     promise: any;
@@ -30,6 +79,94 @@ export declare interface BackgroundOptions {
 export declare type BackgroundSource = string | MediaStream | ImageBitmap | MediaStreamTrack | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas;
 
 /**
+ * Position is set by picking a field from the inset family (`left`/`right`
+ * for X, `top`/`bottom` for Y) or by using `centerX`/`centerY` to centre.
+ * The chosen field also acts as the anchor - setting `right` means
+ * "right-anchored, distance from parent's right edge".
+ *
+ * Both insets on the same axis may be set simultaneously: `left: "10px",
+ * right: "20px"` anchors both edges and **derives the size** on that
+ * axis from the parent - `width = parent - left - right`. In this
+ * dual-inset mode the derived size wins over any explicit `width` (or
+ * `height` for `top`+`bottom`); `min/max` clamping still applies to the
+ * derived result.
+ *
+ * `centerX`/`centerY` is mutually exclusive with the inset fields on its
+ * axis - when an inset is set, `centerX` is ignored.
+ *
+ * Default if nothing is set: `left: 0` / `top: 0`.
+ */
+declare interface BaseNode {
+    /** Required if the node needs to be targeted by animations or runtime
+     *  setters. `"frame"` is reserved - used by positional tweens as
+     *  `relativeTo: "frame"` to reference the video frame. */
+    id?: string;
+    /** Distance from parent's left edge to this node's left edge. */
+    left?: Length;
+    /** Distance from parent's right edge to this node's right edge. */
+    right?: Length;
+    /** Horizontal offset from the centre of the parent. `0` = perfectly centred. */
+    centerX?: Length;
+    /** Distance from parent's top edge to this node's top edge. */
+    top?: Length;
+    /** Distance from parent's bottom edge to this node's bottom edge. */
+    bottom?: Length;
+    /** Vertical offset from the centre of the parent. `0` = perfectly centred. */
+    centerY?: Length;
+    width?: Length;
+    height?: Length;
+    /**
+     * Lower bound for the node's computed width. Clamps the laid-out size
+     * from below - applies to both auto-sized nodes (hugged size lifted to
+     * `minWidth`) and explicit-sized nodes (if `width < minWidth`, wins
+     * `minWidth`, same as CSS).
+     */
+    minWidth?: Length;
+    /** Lower bound for the node's computed height. See `minWidth`. */
+    minHeight?: Length;
+    maxWidth?: Length;
+    maxHeight?: Length;
+    /** 0..1, default 1. */
+    alpha?: number;
+    /** Id of a `RectNode` with `isMask: true` whose bounds clip this node.
+     *  The mask rect may live anywhere in the tree; it is resolved by id at
+     *  parse time. Only rects may be used as masks. */
+    mask?: string;
+    /** Default true. */
+    visible?: boolean;
+    /**
+     * Reserves space on each side of the node by inflating its bounding box.
+     * Lives on the child rather than as container-level padding, so the
+     * parent needs no declaration to give one of its children breathing room.
+     *
+     *  - In an **auto-sized parent** the parent hugs `child + margin`, so
+     *    margin effectively enlarges the parent. This drives the
+     *    "background plate" pattern: in an auto-sized group, put an
+     *    omitted-size `Rect` next to a `Text` with `margin: "10px"` -- the
+     *    group hugs text plus margin, the rect autofills the group, and
+     *    the text sits visually inset 10 px inside the plate.
+     *  - In an **explicit-sized parent** the parent's size is fixed, so
+     *    margin only shifts this node's own placement inward.
+     *  - In a **`StackNode`** margin is added to the child's flow slot on
+     *    both sides and compounds with `gap`: two adjacent children with
+     *    `margin: "10px"` separated by `gap: "5px"` produce a 25 px visual
+     *    gap (10 + 5 + 10).
+     */
+    margin?: Padding;
+}
+
+declare interface BaseTween {
+    /** Node id to animate. */
+    target: string;
+    /** Default 0. */
+    delay?: Duration;
+    /** Default: fills the remaining phase time after `delay`. */
+    duration?: Duration;
+    /** Default "linear". */
+    easing?: Easing;
+}
+
+/**
  * @inline
  */
 export declare type ChromaKeySettings = {
@@ -44,6 +181,8 @@ export declare type ChromaKeySettings = {
 };
 
 export declare type ClassType<A extends Keys> = Extract<Tuples<Keys>, [A, any]>[1];
+
+declare type Color = number;
 
 /**
  * Configuration for the Color Correction effect.
@@ -164,8 +303,31 @@ export declare interface ColorFilterConfig {
     power: number;
     lut: File | string;
     capacity: number;
+    /**
+     * Optional notifier for the LUT load triggered by this config. Its `resolve`
+     * is called once the LUT is loaded and applied; its `reject` is called if the
+     * load fails or the effect is destroyed mid-load.
+     */
     promise?: PromiseContainer;
 }
+
+/** Properties whose values are `Color` numbers (0xRRGGBB). */
+declare type ColorProperty = "fill";
+
+/**
+ * Tween for a colour property (currently `fill` on `RectNode`).
+ * Channels (R, G, B) interpolate independently.
+ */
+declare interface ColorTween extends BaseTween {
+    property: ColorProperty;
+    /** Default: the property's current value when the tween starts. */
+    from?: Color;
+    /** Default: the node's declared (base) value for the property. */
+    to?: Color;
+}
+
+/** Construct a vertical (column) `StackNode`. */
+declare function columnStack(args: Omit<StackNode, "type" | "direction" | "children">, children?: Node_2[]): StackNode;
 
 declare abstract class Component {
     setOptions(options?: Options): void;
@@ -204,6 +366,7 @@ export declare const componentsMap: {
     lowerthird_4: typeof LtDoubleSlideRect;
     lowerthird_5: typeof LtTwoSlideRects;
     stickers: typeof Stickers;
+    custom_overlay: typeof CustomOverlay;
 };
 
 export declare interface Coord {
@@ -212,6 +375,27 @@ export declare interface Coord {
     x2: number;
     y2: number;
 }
+
+export declare class CustomOverlay extends Component {
+    setOptions(options?: CustomOverlayOptions & {
+        [key: string]: any;
+    }): void;
+    show(): void;
+    hide(): void;
+    patch(nodeId: string, patch: NodePatch): void;
+}
+
+export declare interface CustomOverlayOptions {
+    definition: OverlayDefinition;
+}
+
+/**
+ * A `Duration` is either absolute (string) or a fraction of the surrounding
+ * `AnimationPhase.duration` (plain number, 0..1).
+ */
+declare type Duration = AbsoluteDuration | number;
+
+declare type Easing = "linear" | "ease-out-sine" | "ease-out-quint" | "ease-out-cubic" | "ease-in-sine" | "ease-in-quint" | "ease-in-cubic";
 
 export declare enum ErrorCode {
     GPU_DEVICE_LOST = 1001,
@@ -238,7 +422,8 @@ export declare enum ErrorCode {
     RENDER_CONTEXT_RESTORED = 3031,
     RENDER_CONTEXT_REBUILT = 3032,
     OUTPUT_STREAM_INVALIDATED = 1062,
-    RENDER_CONTEXT_REBUILD_FAILED = 1063
+    RENDER_CONTEXT_REBUILD_FAILED = 1063,
+    SOFTWARE_RENDERER_SKIPPED = 1064
 }
 
 export declare enum ErrorEmitter {
@@ -323,7 +508,41 @@ export declare interface FaceLandmarkerConfig {
     model: string;
 }
 
+declare type FontWeight = "100" | "200" | "300" | "400" | "500" | "600" | "700" | "800" | "900" | "normal" | "bold";
+
 export declare type FrameFormat = "RGBX" | "I420";
+
+/**
+ * Construct a `GroupNode`. Children are passed as an array so the `[]`
+ * visually delimits the subtree from the props block.
+ */
+declare function group(args: Omit<GroupNode, "type" | "children">, children?: Node_2[]): GroupNode;
+
+/**
+ * Structural container.
+ *
+ * Sizing:
+ *  - If `width`/`height` is set, the group has that size; children do not
+ *    affect it.
+ *  - If `width`/`height` is omitted, the group hugs the bounding box of
+ *    its children **including each child's `margin`**. A child sized as a
+ *    fraction/percent of that same axis (a plain `number` or `"N%"`) does
+ *    **not** contribute to the hug - that would be circular - so the group
+ *    sizes from its `"Npx"` and intrinsic children (Text, or an
+ *    omitted-size Rect). The fraction then resolves against the group's
+ *    final size at layout, so e.g. a `width: 1` rect fills the
+ *    text-hugged group (a background plate) without inflating it.
+ *
+ * `GroupNode` has no container-level padding: use `margin` on the child
+ * that needs breathing room. This keeps the "background plate" pattern
+ * unambiguous - an omitted-size `Rect` always fills the group's full
+ * border-box, and margin on its sibling controls how far the content
+ * sits inside that plate.
+ */
+declare interface GroupNode extends BaseNode {
+    type: "group";
+    children: Node_2[];
+}
 
 export declare interface IRecorder {
     start(): boolean;
@@ -352,6 +571,33 @@ export declare enum LayoutMode {
     CIRCLE = "circle"
 }
 
+/**
+ * Geometry length.
+ *  - plain `number` -> fraction of the parent dimension (0..1)
+ *  - `"N%"`         -> same, written the CSS way
+ *  - `"Npx"`        -> design pixels, scaled with `OverlayDefinition.designWidth`
+ */
+declare type Length = number | `${number}%` | LengthPx;
+
+/**
+ * Geometry length in pixels.
+ *  - `"Npx"`        -> design pixels, scaled with `OverlayDefinition.designWidth`
+ */
+declare type LengthPx = `${number}px`;
+
+/**
+ * Effects that can be added to the pipeline at runtime via {@link tsvb.loadEffect}.
+ * For the Avatars effect use {@link tsvb.loadAvatars} instead.
+ */
+export declare type LoadableEffect = 'virtual_background' | 'smart_zoom' | 'low_light' | 'color_correction';
+
+/**
+ * Base class for the built-in lower thirds. Each subclass supplies an
+ * {@link OverlayDefinition} (via {@link buildDefinition}) and its font URLs;
+ * the shared custom-overlay engine ({@link OverlayRuntime}) does the layout and
+ * animation. Animation is frame-driven through {@link willDraw}, exactly like
+ * `CustomOverlay`.
+ */
 declare abstract class LowerThird extends Component {
     setOptions(options?: LtOptions, render?: boolean): void;
     showLowerThird(): void;
@@ -402,11 +648,57 @@ declare interface LtTextOptions {
 declare class LtTwoSlideRects extends LowerThird {
 }
 
+/**
+ * Construct a mask `RectNode` (`isMask: true`). Mask rects have no fill and
+ * are referenced by another node's `mask` field to clip its rendering.
+ */
+declare function maskRect(args: Omit<RectNode, "type" | "isMask" | "fill">): RectNode;
+
 export declare type Metrics = {
     fps: number;
     segmentationInferenceTime: number;
     fullFrameDrawTime: number;
 };
+
+declare type Node_2 = GroupNode | StackNode | TextNode | RectNode;
+
+/**
+ * Patch payload for `CustomOverlay.patch`. Lists every field that may be
+ * mutated on a live node - a loose union covering all node kinds. At
+ * runtime the overlay validates that each provided field is applicable
+ * to the addressed node (e.g. `text` on a non-`TextNode` throws).
+ *
+ * Not patchable:
+ *  - `id`, `type` - immutable identity.
+ *  - `children` - tree structure is fixed; remove and re-add the
+ *    overlay if you need a different layout.
+ *  - `mask` / `isMask` - mask wiring is structural. Patch the referenced
+ *    rect's dimensions like any other node to animate the clip.
+ */
+declare type NodePatch = Partial<{
+    left: Length;
+    right: Length;
+    centerX: Length;
+    top: Length;
+    bottom: Length;
+    centerY: Length;
+    width: Length;
+    height: Length;
+    minWidth: Length;
+    minHeight: Length;
+    maxWidth: Length;
+    maxHeight: Length;
+    alpha: number;
+    visible: boolean;
+    margin: Padding;
+    gap: LengthPx;
+    align: "start" | "center" | "end" | "stretch";
+    direction: "row" | "column";
+    text: string;
+    style: Partial<TextStyle>;
+    fill: Color;
+    cornerRadius: number;
+}>;
 
 declare type Options = {
     [key: string]: any;
@@ -423,6 +715,80 @@ export declare interface OptionsMap {
     lowerthird_4: LtOptions;
     lowerthird_5: LtOptions;
     stickers: StickerOptions;
+    custom_overlay: CustomOverlayOptions;
+}
+
+export declare namespace overlay {
+    export {
+        text,
+        rect,
+        maskRect,
+        group,
+        rowStack,
+        columnStack,
+        pad,
+        AnimatableProperty,
+        AnimationEnd,
+        AnimationPhase,
+        AbsoluteDuration,
+        BaseNode,
+        Color,
+        Duration,
+        Easing,
+        FontWeight,
+        GroupNode,
+        Length,
+        Node_2 as Node,
+        NodePatch,
+        OverlayDefinition,
+        Padding,
+        PositionalProperty,
+        PositionalTween,
+        RectNode,
+        ScalarProperty,
+        ScalarTween,
+        StackNode,
+        TextNode,
+        TextStyle,
+        Tween,
+        TweenPositionValue,
+        TweenReference,
+        PaddingSides
+    }
+}
+
+declare interface OverlayDefinition {
+    /**
+     * Tree root. Must be a structural container - `GroupNode` or `StackNode`.
+     * Position the root inside the video frame using its own inset fields
+     * (`left`/`right`/`top`/`bottom`/`centerX`/`centerY`) - the root's
+     * "parent" is the frame.
+     */
+    root: GroupNode | StackNode;
+    /**
+     * Frame width (in design pixels) the overlay is authored against.
+     * A length of `"40px"` resolves to `40 * frameWidth / designWidth`
+     * device pixels at render time, so the overlay scales proportionally
+     * with the actual frame width.
+     *
+     * Default `1280` - matches a typical 720p design comp. Set to `1920`
+     * if you author against 1080p, or any other reference width that
+     * matches your design tooling.
+     */
+    designWidth?: number;
+    /** Optional show animation. If absent, the overlay appears instantly. */
+    show?: AnimationPhase;
+    /**
+     * Optional hide animation.
+     *  - **Absent** -> the `show` phase is played backwards (its progress runs
+     *    `1 -> 0`). Because it is the same curve run in reverse, the easing is
+     *    mirrored too: an `ease-out` entrance becomes an `ease-in`-feel exit.
+     *    Interrupting a running `show` with `hide` (or vice versa) flips the
+     *    direction and retraces from the current point.
+     *  - **Present** -> played forward as authored, as its own independent
+     *    timeline.
+     */
+    hide?: AnimationPhase;
 }
 
 declare class OverlayScreen extends Component {
@@ -435,6 +801,40 @@ export declare interface OverlayScreenOptions {
     url?: string;
     promise?: PromiseContainer;
 }
+
+/**
+ * Padding / margin shorthand. Accepts numbers in design pixels and returns
+ * a {@link Padding} suitable for `node.margin` (or any other `Padding`
+ * field).
+ *
+ * - `pad(16)` — all four sides 16px.
+ * - `pad(10, 16)` — CSS-style shorthand: vertical 10px, horizontal 16px.
+ * - `pad({ left: 40 })` — per-side; only the specified sides are emitted.
+ */
+declare function pad(all: number): Padding;
+
+declare function pad(vertical: number, horizontal: number): Padding;
+
+declare function pad(sides: PaddingSides): Padding;
+
+/**
+ * Padding around an auto-sized container. Scalar applies to all sides;
+ * object form allows per-side values.
+ */
+declare type Padding = LengthPx | {
+    top?: LengthPx;
+    right?: LengthPx;
+    bottom?: LengthPx;
+    left?: LengthPx;
+};
+
+/** Per-side padding shape accepted by {@link pad}. */
+declare type PaddingSides = {
+    top?: number;
+    right?: number;
+    bottom?: number;
+    left?: number;
+};
 
 declare type Placement = "top-left" | "bottom-left" | "center" | "top-right" | "bottom-right" | "custom";
 
@@ -453,6 +853,50 @@ declare interface Position {
     placement?: Placement;
 }
 
+/** Properties whose values use `Length` semantics (fraction of parent vs. px). */
+declare type PositionalProperty = "left" | "right" | "centerX" | "top" | "bottom" | "centerY" | "width" | "height";
+
+/**
+ * Tween for a positional property. `from`/`to` use `Length` semantics:
+ *  - `0`        -> flush against the anchored edge (e.g. for `right`, the
+ *                 node's right edge sits on the parent's right edge).
+ *  - `1`        -> one full parent dimension away from that edge inwards
+ *                 (for `right: 1`, the node's right edge sits at the
+ *                 parent's left edge - fully off-screen to the left).
+ *  - `-1`       -> one full parent dimension away outwards
+ *                 (for `right: -1`, the node is fully off-screen right).
+ *  - `"50%"`    -> 50 % of the relevant dimension.
+ *  - `"40px"`   -> design pixels, scaled with `OverlayDefinition.designWidth`.
+ *
+ * Use the object form `{ value, relativeTo }` to place the property's
+ * edge at an absolute coordinate inside a reference node's box.
+ * `relativeTo: "frame"` uses the video frame; any other string is a
+ * node id. `value` is multiplied by the reference's dimension on the
+ * tween's axis and added to its leading edge - so the meaning of the
+ * number does **not** depend on which positional field is animated:
+ *  - `0`        -> reference's leading (left / top) edge.
+ *  - `1`        -> reference's trailing (right / bottom) edge.
+ *  - `-1`       -> one full reference-size before the leading edge.
+ *  - `"50%"`    -> middle of the reference.
+ * Resolved once at tween start. Mixing a `relativeTo` endpoint with a
+ * plain `Length` endpoint leaves the plain side as "no override": it
+ * falls through to the default (`from` -> current edge, `to` -> snapshot
+ * base edge).
+ */
+declare interface PositionalTween extends BaseTween {
+    property: PositionalProperty;
+    /** Default: the property's current value when the tween starts. If the
+     *  property is not declared on the node, defaults to the value that
+     *  reproduces the node's resting position (see `to`). */
+    from?: TweenPositionValue;
+    /** Default: the node's declared (base) value for the property. If the
+     *  property is not declared on the node (e.g. animating `right` on a
+     *  `left`-anchored node), it defaults to the value that lands the node at
+     *  its resting position - so the tween settles visually identical to the
+     *  base layout instead of snapping to `0`. */
+    to?: TweenPositionValue;
+}
+
 export declare enum PresetType {
     SPEED = "speed",
     BALANCED = "balanced",
@@ -465,14 +909,88 @@ export declare interface PromiseContainer {
     reject: Function;
 }
 
+/**
+ * Construct a `RectNode`. The fill colour is positional; other props go in
+ * the optional second argument.
+ */
+declare function rect(fill: number, args?: Omit<RectNode, "type" | "fill">): RectNode;
+
+/**
+ * Rectangle primitive.
+ *
+ * Sizing:
+ *  - If `width`/`height` is set, that size is used.
+ *  - If `width`/`height` is omitted, the rect fills its parent. Combined
+ *    with an auto-sized group and a sibling that carries `margin`, this
+ *    is the "background plate" pattern: the group hugs content + margin,
+ *    and the rect stretches to the group's border-box.
+ */
+declare interface RectNode extends BaseNode {
+    type: "rect";
+    fill?: Color;
+    /** px at the `designWidth` base. */
+    cornerRadius?: number;
+    /** When true, this rect is invisible at render time and is intended to
+     *  be referenced by another node's `mask` field as a sprite-mask source.
+     *  The rect participates in layout exactly like any other rect - only
+     *  its visual draw is suppressed. Only rects may be used as masks. */
+    isMask?: boolean;
+}
+
 export declare type ResizeSettings = {
     width: number;
     height: number;
 };
 
+/** Construct a horizontal (row) `StackNode`. */
+declare function rowStack(args: Omit<StackNode, "type" | "direction" | "children">, children?: Node_2[]): StackNode;
+
+/** Properties whose values are plain numbers (no notion of parent units). */
+declare type ScalarProperty = "alpha";
+
+/**
+ * Tween for a scalar property. `from`/`to` are raw numbers in the
+ * property's own units (alpha 0..1).
+ */
+declare interface ScalarTween extends BaseTween {
+    property: ScalarProperty;
+    /** Default: the property's current value when the tween starts. */
+    from?: number;
+    /** Default: the node's declared (base) value for the property. */
+    to?: number;
+}
+
+/**
+ * Error type that is thrown by the SDK.
+ *
+ * It exposes readable details about the failure through its `code`,
+ * `emitter`, `data` and `errorCause` fields, so it can be inspected and handled.
+ *
+ * Catch the rejection and narrow it with `instanceof`:
+ * ```ts
+ * try {
+ *   await sdk.loadEffect('virtual_background');
+ * } catch (e) {
+ *   if (e instanceof SdkError) {
+ *     // Inspect e.code / e.emitter / e.data and handle the failure
+ *   }
+ * }
+ * ```
+ */
+export declare class SdkError extends Error {
+    /** Failure code identifying the specific failure. */
+    readonly code?: ErrorCode;
+    /** SDK module that produced the error. */
+    readonly emitter?: ErrorEmitter;
+    /** The underlying error that caused this one, when available. */
+    readonly errorCause?: Error;
+    /** Extra context about the failure (model URL, HTTP status, etc.). */
+    readonly data?: any;
+}
+
 export declare interface SDKTracks {
-    sdkAudioTrack: MediaStreamTrack;
-    sdkVideoTrack: MediaStreamTrack;
+    sdkAudioTrack?: MediaStreamTrack;
+    sdkVideoTrack?: MediaStreamTrack;
 }
 
 export declare interface SharpnessConfig {
@@ -480,6 +998,87 @@ export declare interface SharpnessConfig {
 }
 
 export declare type SingleKey<K> = [K] extends (K extends Keys ? [K] : never) ? K : never;
+
+/**
+ * Linear layout container - lays its children sequentially along
+ * `direction` (`row` = left -> right, `column` = top -> bottom) with `gap`
+ * between them.
+ *
+ * Sizing:
+ *  - If `width`/`height` is set on the relevant axis, that size is used.
+ *  - If omitted on the **flow axis**, the stack hugs the sum of children
+ *    sizes (including their `margin`) + gaps on that axis.
+ *  - If omitted on the **cross axis**, the stack hugs the maximum of
+ *    children sizes (including their `margin`) on that axis.
+ *  - The fractional-`Length` rule applies per-axis: a child's fractional
+ *    `width`/`height` on an auto-sized axis does not contribute to the
+ *    stack's hug there (it would be circular) and resolves against the
+ *    stack's final size at layout; the hug comes from `"Npx"`/intrinsic
+ *    children.
+ *
+ * Positioning of stacked children (unified with `GroupNode`'s slot
+ * model - every child sits in a slot in the parent's inner area):
+ *  - The stack flow distribution gives each child a slot whose flow
+ *    extent matches its allocation and whose cross extent is the
+ *    stack's full inner cross span. Inside that slot, size and position
+ *    follow the same rules as for a group child: insets, explicit
+ *    `width`/`height`, `centerX`/`centerY`, and `min/max` clamping. The
+ *    only stack-specific extras are `align` (default cross positioning
+ *    when no centre/inset is set) and the autofill rule on the cross
+ *    axis (see below).
+ *  - **Size on each axis**, in priority order:
+ *      1. Dual inset on the axis -> `fillSize - a - b` (fillSize = slot
+ *         size minus the child's margin on the axis).
+ *      2. Explicit `width`/`height` -> as declared.
+ *      3. Single inset on the axis with autofill -> `fillSize - inset`.
+ *      4. Autofill (no inset, no explicit) -> `fillSize`.
+ *      5. Intrinsic.
+ *    Autofill applies to: rect children always; non-rect children only
+ *    when nothing pins the axis - no inset and no `centerX`/`centerY`
+ *    on it (on the cross axis `align: stretch` is additionally
+ *    required). A single inset anchors a non-rect at its intrinsic
+ *    size - exactly as in a group - while a rect still autofills from
+ *    the anchor.
+ *    `min/max` constraints do not change the regime - they clamp the
+ *    autofilled size like any other computed size. So a rect
+ *    with no `height` and `centerY: 0` autofills the cross slot (and
+ *    `centerY: 0` is moot since the fill already centres it); the same
+ *    rect with `height: "8px"` and `centerY: 0` is 8px tall and centred.
+ *  - **Position on each axis**, in priority order:
+ *      1. Leading inset (`left`/`top`) -> `fillStart + inset`.
+ *      2. Trailing inset alone -> `fillEnd - inset - size`.
+ *      3. `centerX`/`centerY` -> `fillStart + (fillSize - size)/2 + value`.
+ *      4. Cross axis with no positional field -> `align`.
+ *      5. Otherwise -> `fillStart`.
+ *    Insets and `centerX`/`centerY` resolve against the **slot's size**
+ *    (both the anchor and the fraction's multiplier live in the slot);
+ *    explicit dims and `min/max` resolve against the **stack's inner
+ *    size**.
+ *  - **Negative single inset on rect autofill**: `left: "-4px"` with no
+ *    `width` autofills `fillSize - (-4) = fillSize + 4` and anchors at
+ *    `fillStart + (-4)` - the rect extends 4px past the leading slot
+ *    edge while still reaching the trailing edge. Same idea on any
+ *    axis. If a single inset places the child fully outside the slot,
+ *    autofill collapses to size 0.
+ *  - **`align`** still controls cross positioning for children with no
+ *    cross-axis positional field. `stretch` (the default) is the
+ *    autofill trigger for non-rect children. Per-child align overrides
+ *    are not supported.
+ *  - Positional **tweens** target `def[prop]` so they inherit the same
+ *    rules. A `{ property: "centerY", from: -1 }` on a row-stack child
+ *    animates the cross centre offset (slot-relative). A `{ property:
+ *    "top", from: "30px" }` on a row-stack child shifts the autofill
+ *    range / single-inset anchor over time.
+ */
+declare interface StackNode extends BaseNode {
+    type: "stack";
+    direction: "row" | "column";
+    children: Node_2[];
+    /** Space between adjacent children along the flow axis. Default 0. */
+    gap?: LengthPx;
+    /** Cross-axis alignment of every child within its slot. Default "stretch". */
+    align?: "start" | "center" | "end" | "stretch";
+}
 
 export declare interface StickerOptions {
     capacity: number;
@@ -499,6 +1098,33 @@ declare class Stickers extends Component {
     onLoadSucccess(f?: Function): void;
     onLoadError(f?: Function): void;
     setOptions(options: Partial<StickerOptions>): Promise<void>;
+}
+
+/**
+ * Construct a `TextNode`. The text content is positional since it is the
+ * defining attribute; everything else (id, style, margin, mask, ...) goes in
+ * the optional second argument.
+ */
+declare function text(text: string, args?: Omit<TextNode, "type" | "text">): TextNode;
+
+declare interface TextNode extends BaseNode {
+    type: "text";
+    text: string;
+    style?: TextStyle;
+}
+
+declare interface TextStyle {
+    fontFamily?: string | string[];
+    /** px at the `designWidth` base; scaled by the renderer. */
+    fontSize?: number;
+    fontWeight?: FontWeight;
+    fontStyle?: "normal" | "italic";
+    fill?: Color;
+    letterSpacing?: number;
+    lineHeight?: number;
+    align?: "left" | "center" | "right";
+    wordWrap?: boolean;
+    breakWords?: boolean;
 }
 
 /**
@@ -532,7 +1158,7 @@ export declare class tsvb {
     constructor(customer_id: string, inference?: any);
     getSnapshot(): Promise<ImageBitmap>;
     /**
-     * Check the minimal requirements for SDK
+     * Check the minimal requirements for SDK.
      */
     isSupported(): boolean;
     /**
@@ -699,6 +1325,41 @@ export declare class tsvb {
      */
     processFrame(videoFrame: VideoFrame): Promise<VideoFrame>;
     /**
+     * Dynamically load an effect and add it to the processing pipeline.
+     *
+     * Only needed for an effect you excluded from the `effects` config option:
+     * such effects are not loaded during initialization, and their public methods
+     * (e.g. `setBlur`, `enableSmartZoom`) do nothing until the effect is loaded.
+     * Effects that are in `effects` (which by default includes all of them) are
+     * already loaded, so calling this for them is a harmless no-op.
+     *
+     * Must be called after the SDK is ready (i.e. after `onReady` has fired).
+     *
+     * The model is authenticated against the session server as part of the load.
+     *
+     * For the Avatars effect use {@link loadAvatars} instead.
+     *
+     * @param type - the effect to load.
+     * @returns A promise that resolves when the effect is ready to start.
+     *
+     * @example
+     * ```js
+     * import { tsvb, SdkError } from 'effects-sdk';
+     *
+     * try {
+     *   await sdk.loadEffect('virtual_background');
+     *   sdk.setBlur(0.6);
+     * } catch (e) {
+     *   if (e instanceof SdkError) {
+     *     console.error('loadEffect failed:', e.code, e.message);
+     *   } else if (e.name === 'AbortError') {
+     *     // The load was superseded by destroy()/useStream() — usually ignorable.
+     *   }
+     * }
+     * ```
+     */
+    loadEffect(type: LoadableEffect): Promise<void>;
+    /**
      * Get Customer ID provided by vendor.
      */
     getCustomerId(): string;
@@ -805,6 +1466,23 @@ export declare class tsvb {
      *
      */
     disableBeautification(): boolean;
+    /**
+     * Switch the execution provider for an ML model at runtime.
+     *
+     * Currently only `model: 'segmentation'` with `provider: 'wasm'`
+     * (WebGPU -> CPU) is supported.
+     *
+     * @param options - which model to switch and the target execution provider
+     *
+     * @example
+     * ```js
+     * await sdk.setProvider({ model: 'segmentation', provider: 'wasm' });
+     * ```
+     */
+    setProvider(options: {
+        model: 'segmentation';
+        provider: 'wasm';
+    }): Promise<void>;
     /**
      * @deprecated with updated models don't need anymore
      * Control boundary mode smooth or strong.
@@ -1052,7 +1730,27 @@ export declare class tsvb {
      */
     disableColorFilter(): boolean;
     /**
-     * set color-filter config.
+     * Set color-filter config.
+     *
+     * Pass a {@link ColorFilterConfig.promise} to be notified when the LUT load
+     * triggered by this call settles: it resolves on success and rejects on
+     * failure (or if the effect is destroyed mid-load).
+     *
+     * Returns `false` when the color-filter effect is not available. In that case
+     * the config is not applied and the supplied `promise` is never settled, so
+     * guard against it when wrapping the call in a promise:
+     *
+     * ```ts
+     * function applyColorFilter(sdk, config) {
+     *   return new Promise((resolve, reject) => {
+     *     const applied = sdk.setColorFilterConfig({
+     *       ...config,
+     *       promise: { resolve, reject },
+     *     });
+     *     if (!applied) reject(new Error("color-filter effect is not available"));
+     *   });
+     * }
+     * ```
      */
     setColorFilterConfig(config: Partial<ColorFilterConfig>): boolean;
     /**
@@ -1178,7 +1876,29 @@ export declare class tsvb {
     onChangeInputResolution(f?: () => void): void;
     /** @ignore */
     onAuthRequest(f?: (url: string, payload: Object) => Promise<string>): void;
+    /**
+     * Register a callback invoked every time a LUT is successfully loaded and
+     * applied to the color-filter effect.
+     *
+     * @deprecated Prefer the per-call {@link ColorFilterConfig.promise} passed to
+     * {@link setColorFilterConfig}. This callback is not invoked when a load fails,
+     * whereas the promise also surfaces failures via rejection.
+     *
+     * @param f - called with the loaded LUT id; pass `undefined` to clear.
+     */
     onColorFilterSuccess(f?: (id: string) => void): void;
+    /**
+     * Register a callback invoked once the low-light effect is ready and starts
+     * being applied to the video.
+     *
+     * The callback is one-shot: it fires a single time and is then cleared.
+     *
+     * @remarks It is not invoked unless the low-light effect is enabled — the
+     * effect becomes ready only while it is active. It also does not report
+     * failures.
+     *
+     * @param f - called once when the effect becomes active; pass `undefined` to clear.
+     */
     onLowLightSuccess(f?: () => void): void;
     onBackgroundSuccess(f?: () => void): void;
     /**
@@ -1190,6 +1910,32 @@ export declare class tsvb {
 }
 
 export declare type Tuples<T> = T extends Keys ? [T, InstanceType<ComponentsMap[T]>] : never;
+
+declare type Tween = PositionalTween | ScalarTween | ColorTween;
+
+/**
+ * Positional tween endpoint. Either a plain `Length` (interpreted against
+ * the animated node's immediate parent, like static fields) or an object
+ * form that takes dimensions from a different reference node.
+ *
+ * With `relativeTo`, the `value` is multiplied by the reference node's
+ * dimension on the tween's axis (`width` for x-axis properties, `height`
+ * for y). Resolved **once at tween start** - later resizes of the
+ * reference do not retarget an in-flight tween.
+ */
+declare type TweenPositionValue = Length | {
+    value: Length;
+    relativeTo: TweenReference;
+};
+
+/**
+ * Reference for resolving a positional tween value. `"frame"` is reserved
+ * and means the video frame - useful for slide-in entrances that should
+ * start one frame-width away from the edge regardless of the immediate
+ * parent's size. Any other string is a node `id` somewhere in the tree;
+ * `id: "frame"` on a node is rejected at parse time.
+ */
+declare type TweenReference = "frame" | string;
 
 declare class Watermark extends Component {
     setOptions(options?: WatermarkOptions): void;
