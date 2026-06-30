@@ -157,6 +157,7 @@ window.addEventListener('load', function () {
 ## Documentation
 - [API Reference](https://effectssdk.ai/sdk/web/docs/classes/tsvb.html)
 - [Feature Usage](docs/Features-Usage-Examples.md)
+- [Custom Overlays - Captions & Lower Thirds](docs/Custom-Overlay-Guide.md)
 - [Avatars Usage](docs/Avatars.md)
 - [Best Practices](docs/Best-Practices.md)
 - [Error Handling](docs/General-Error-Handling.md)

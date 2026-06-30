@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="300" viewBox="0 0 240 300" font-family="-apple-system, Segoe UI, Roboto, sans-serif">
+  <!-- dark backdrop so white text reads -->
+  <rect x="0" y="0" width="240" height="300" rx="8" fill="#2b3038"/>
+
+  <!-- text -->
+  <text x="20" y="28" fill="#9aa0a6" font-size="12" font-weight="600">text</text>
+  <text x="20" y="54" fill="#ffffff" font-size="22" font-weight="600">Hello</text>
+
+  <!-- rect (cornerRadius) -->
+  <text x="20" y="92" fill="#9aa0a6" font-size="12" font-weight="600">rect (cornerRadius)</text>
+  <rect x="20" y="100" width="120" height="32" rx="8" fill="#0083f1"/>
+
+  <!-- group (hugs content) -->
+  <text x="20" y="168" fill="#9aa0a6" font-size="12" font-weight="600">group (hugs content)</text>
+  <rect x="20" y="176" width="76" height="36" rx="6" fill="#101317"/>
+  <text x="58" y="200" fill="#ffffff" font-size="18" text-anchor="middle">Plate</text>
+
+  <!-- rowStack -->
+  <text x="20" y="248" fill="#9aa0a6" font-size="12" font-weight="600">rowStack</text>
+  <circle cx="25" cy="268" r="5" fill="#2ecc71"/>
+  <text x="38" y="274" fill="#ffffff" font-size="18">Live</text>
+</svg>

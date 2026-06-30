@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="360" viewBox="0 0 860 360" font-family="-apple-system, Segoe UI, Roboto, sans-serif">
+  <!-- video frame backdrop -->
+  <rect x="0" y="0" width="860" height="360" fill="#1c1f24"/>
+  <!-- separator between render and legend -->
+  <line x1="410" y1="28" x2="410" y2="332" stroke="#2c3036" stroke-width="1"/>
+
+  <!-- ── rendered lower third (rest state) ─────────────────────────── -->
+  <!-- The bar spans the full column width; the text groups are inset by their
+       margin (16 left / 50 right), so the text sits inside the bar's span. -->
+
+  <!-- title (right-aligned, inset from the bar's right end) -->
+  <text x="349" y="98" text-anchor="end" fill="#ffffff" font-size="34" font-weight="700">LowerThird Title</text>
+
+  <!-- primary bar (overhangs 4px left, runs to the column's right edge) -->
+  <rect x="50" y="116" width="345" height="6" rx="3" fill="#0083f1"/>
+
+  <!-- subtitle (right-aligned) -->
+  <text x="349" y="152" text-anchor="end" fill="#e6e8ea" font-size="18" font-weight="400">LowerThird Subtitle</text>
+
+  <!-- mask clip boxes (dashed) = group inner box, inset from the bar -->
+  <rect x="70" y="58"  width="279" height="46" fill="none" stroke="#f2b134" stroke-width="1.4" stroke-dasharray="5 4"/>
+  <rect x="70" y="128" width="279" height="34" fill="none" stroke="#f2b134" stroke-width="1.4" stroke-dasharray="5 4"/>
+
+  <!-- numbered badges -->
+  <g font-size="12" font-weight="700" text-anchor="middle">
+    <g><circle cx="64"  cy="56"  r="11" fill="#101317" stroke="#ffffff" stroke-width="1.4"/><text x="64"  y="60"  fill="#fff">1</text></g>
+    <g><circle cx="210" cy="86"  r="11" fill="#101317" stroke="#ffffff" stroke-width="1.4"/><text x="210" y="90"  fill="#fff">2</text></g>
+    <g><circle cx="353" cy="74"  r="11" fill="#101317" stroke="#ffffff" stroke-width="1.4"/><text x="353" y="78"  fill="#fff">3</text></g>
+    <g><circle cx="390" cy="119" r="11" fill="#101317" stroke="#ffffff" stroke-width="1.4"/><text x="390" y="123" fill="#fff">4</text></g>
+    <g><circle cx="64"  cy="130" r="11" fill="#101317" stroke="#ffffff" stroke-width="1.4"/><text x="64"  y="134" fill="#fff">5</text></g>
+    <g><circle cx="270" cy="150" r="11" fill="#101317" stroke="#ffffff" stroke-width="1.4"/><text x="270" y="154" fill="#fff">6</text></g>
+    <g><circle cx="353" cy="146" r="11" fill="#101317" stroke="#ffffff" stroke-width="1.4"/><text x="353" y="150" fill="#fff">7</text></g>
+  </g>
+
+  <!-- ── legend ────────────────────────────────────────────────────── -->
+  <g font-size="13">
+    <g><circle cx="442" cy="56"  r="11" fill="#101317" stroke="#ffffff" stroke-width="1.4"/><text x="442" y="60"  fill="#fff" font-size="12" font-weight="700" text-anchor="middle">1</text>
+       <text x="462" y="60"  fill="#e6e8ea"><tspan font-weight="700">title group</tspan><tspan fill="#9aa0a6"> — group, margin 16 / 50</tspan></text></g>
+    <g><circle cx="442" cy="92"  r="11" fill="#101317" stroke="#ffffff" stroke-width="1.4"/><text x="442" y="96"  fill="#fff" font-size="12" font-weight="700" text-anchor="middle">2</text>
+       <text x="462" y="96"  fill="#e6e8ea"><tspan font-weight="700">title</tspan><tspan fill="#9aa0a6"> — text, align:right, masked; rises from below</tspan></text></g>
+    <g><circle cx="442" cy="128" r="11" fill="#101317" stroke="#ffffff" stroke-width="1.4"/><text x="442" y="132" fill="#fff" font-size="12" font-weight="700" text-anchor="middle">3</text>
+       <text x="462" y="132" fill="#e6e8ea"><tspan font-weight="700">title-mask</tspan><tspan fill="#9aa0a6"> — clip box (width:1)</tspan></text></g>
+    <g><circle cx="442" cy="164" r="11" fill="#101317" stroke="#ffffff" stroke-width="1.4"/><text x="442" y="168" fill="#fff" font-size="12" font-weight="700" text-anchor="middle">4</text>
+       <text x="462" y="168" fill="#e6e8ea"><tspan font-weight="700">bar</tspan><tspan fill="#9aa0a6"> — blue rect, left:-4px, autofills; grows from the left</tspan></text></g>
+    <g><circle cx="442" cy="200" r="11" fill="#101317" stroke="#ffffff" stroke-width="1.4"/><text x="442" y="204" fill="#fff" font-size="12" font-weight="700" text-anchor="middle">5</text>
+       <text x="462" y="204" fill="#e6e8ea"><tspan font-weight="700">subtitle group</tspan><tspan fill="#9aa0a6"> — group, margin 16 / 50</tspan></text></g>
+    <g><circle cx="442" cy="236" r="11" fill="#101317" stroke="#ffffff" stroke-width="1.4"/><text x="442" y="240" fill="#fff" font-size="12" font-weight="700" text-anchor="middle">6</text>
+       <text x="462" y="240" fill="#e6e8ea"><tspan font-weight="700">subtitle</tspan><tspan fill="#9aa0a6"> — text, align:right, masked; drops from above</tspan></text></g>
+    <g><circle cx="442" cy="272" r="11" fill="#101317" stroke="#ffffff" stroke-width="1.4"/><text x="442" y="276" fill="#fff" font-size="12" font-weight="700" text-anchor="middle">7</text>
+       <text x="462" y="276" fill="#e6e8ea"><tspan font-weight="700">subtitle-mask</tspan><tspan fill="#9aa0a6"> — clip box (width:1)</tspan></text></g>
+  </g>
+
+  <!-- caption -->
+  <text x="34" y="344" fill="#9aa0a6" font-size="12">
+    Horizontal Mirror — node anatomy (rest state). <tspan fill="#f2b134">Dashed</tspan> = mask clip boxes; the bar mirrors title up / subtitle down.
+  </text>
+</svg>

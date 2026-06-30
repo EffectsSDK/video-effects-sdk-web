@@ -611,6 +611,8 @@ sdk.components.lowerthird.showLowerThird();
 sdk.components.lowerthird.hideLowerThird();
 ```
 
+To build your own captions and lower thirds - with custom layouts, text, styling, and animations - see the [Custom Overlays guide](./Custom-Overlay-Guide.md).
+
 ## How to resize stream on the fly
 
 ```typescript
