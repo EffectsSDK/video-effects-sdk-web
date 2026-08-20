@@ -413,6 +413,7 @@ export declare enum ErrorCode {
     EFFECT_INITIALIZATION_ISSUE = 1025,
     EFFECT_INITIALIZATION_SUCCESS = 3021,
     NO_VIDEO_TRACK = 1030,
+    VIDEO_PLAYBACK_ISSUE = 1031,
     INFERENCE_RUN_ISSUE = 1040,
     RENDERING_ISSUE = 1050,
     ENQUEUE_FRAME_ISSUE = 1060,
@@ -423,7 +424,8 @@ export declare enum ErrorCode {
     RENDER_CONTEXT_REBUILT = 3032,
     OUTPUT_STREAM_INVALIDATED = 1062,
     RENDER_CONTEXT_REBUILD_FAILED = 1063,
-    SOFTWARE_RENDERER_SKIPPED = 1064
+    SOFTWARE_RENDERER_SKIPPED = 1064,
+    TIMERS_FALLBACK = 1065
 }
 
 export declare enum ErrorEmitter {
@@ -1202,11 +1204,8 @@ export declare class tsvb {
      *        'colorcorrector': 'url', // The feature allows for the provision of a custom model name; if left empty, the feature will be disabled.
      *        'facedetector': 'url', // The feature allows for the provision of a custom model name; if left empty, the feature will be disabled.
      *    },
-     *    wasmPaths: { // Currently, WASM files are loaded from the same directory where the SDK is placed, but custom URLs are also supported (for example, you can load them from CDNs).
-     *        'ort-wasm.wasm': 'url',
-     *        'ort-wasm-simd.wasm': 'url',
-     *        'ort-wasm-threaded.wasm': 'url',
-     *        'ort-wasm-simd-threaded.wasm': 'url'
+     *    wasmPaths: { // The runtime ships as a single file - ort-wasm-simd-threaded.asyncify.wasm. By default it is loaded from the same directory where the SDK is placed, but a custom URL is also supported (for example, you can load it from a CDN).
+     *        wasm: 'url' // URL of ort-wasm-simd-threaded.asyncify.wasm
      *    }
      * }
      *```
@@ -1233,6 +1232,16 @@ export declare class tsvb {
      * ```json
      * config = {
      *    sdk_url: 'https://domain.com/sdk/'  // in this derectory should be subfolder models with all required models
+     * }
+     *```
+     *
+     * @example
+     * Example of how to load the ONNX Runtime WASM binary from a custom location
+     * ```json
+     * config = {
+     *    wasmPaths: {
+     *        wasm: 'https://domain.com/sdk/ort-wasm-simd-threaded.asyncify.wasm'
+     *    }
      * }
      *```
      *
@@ -1405,8 +1414,20 @@ export declare class tsvb {
      */
     toCanvas(canvas: HTMLCanvasElement | null): void;
     /**
-     * Show fps on the stream.
+     * Limit how many frames per second the SDK processes. The default is 30.
      *
+     * Fewer frames mean fewer segmentations and lower CPU/GPU usage. The input track is
+     * asked for the same frame rate; when it cannot deliver it, a warning is reported
+     * through {@link onError} and the track keeps its own rate.
+     *
+     * On some browsers the stream returned by {@link getStream} carries a frame rate ceiling
+     * that is fixed when the stream is created. Set the limit before the first
+     * {@link getStream} call to raise that ceiling; afterwards this method still changes how
+     * many frames are processed, but cannot lift it.
+     *
+     * @param limit - the maximum number of frames per second; must be a positive number.
+     * @returns false when there is no stream to process yet, true otherwise.
+     * @throws An {@link SdkError} if limit is not a positive number.
      */
     setFpsLimit(limit: number): boolean;
     /**
@@ -1474,9 +1495,20 @@ export declare class tsvb {
      *
      * @param options - which model to switch and the target execution provider
      *
+     * @throws Rejects with an {@link SdkError} if the model is unknown, the effect
+     * is not loaded, or the backend switch fails (model download or session creation).
+     *
      * @example
      * ```js
-     * await sdk.setProvider({ model: 'segmentation', provider: 'wasm' });
+     * import { tsvb, SdkError } from 'effects-sdk';
+     *
+     * try {
+     *   await sdk.setProvider({ model: 'segmentation', provider: 'wasm' });
+     * } catch (e) {
+     *   if (e instanceof SdkError) {
+     *     console.error('setProvider failed:', e.code, e.message);
+     *   }
+     * }
      * ```
      */
     setProvider(options: {

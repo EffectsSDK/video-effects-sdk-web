@@ -65,17 +65,16 @@ import { tsvb } from 'effects-sdk';
 
 const sdk = new tsvb('{CUSTOMER_ID}');
 
-// The versions of the WASM files must match the SDK version.
-// IMPORTANT: wasmPaths must use full URLs.
-// Relative paths will not work for the CPU fallback.
+// The inference runtime is a single WASM file; its version must match the SDK version.
+// The npm package includes the file, so you can host it with your static assets.
+// If wasmPaths is not set, the file is loaded from the Effects SDK CDN.
 sdk.config({
     preset: 'balanced',
     provider: 'webgpu',
     test_inference: true,
     cache_models: true,
-    wasmPaths: { 
-            'ort-wasm.wasm': 'https://effectssdk.ai/sdk/web/{VERSION}/ort-wasm.wasm',
-            'ort-wasm-simd.wasm': 'https://effectssdk.ai/sdk/web/{VERSION}/ort-wasm-simd.wasm'
+    wasmPaths: {
+            wasm: 'https://effectssdk.ai/sdk/web/{VERSION}/ort-wasm-simd-threaded.asyncify.wasm'
         }
 });
 
@@ -173,5 +172,5 @@ window.addEventListener('load', function () {
 - Obtain an Effects SDK Customer ID
 - SSL certificate to access MediaStream from the browser
 - Enable Hardware Acceleration
-- Support for WebGL 2.0
+- Support for WebGL (WebGL 2.0 is recommended)
 - WebGPU support (optional)

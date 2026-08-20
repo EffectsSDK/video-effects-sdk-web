@@ -27,5 +27,5 @@ npm run dev
 
 - Obtaining Effects SDK Customer ID
 - SSL to get MediaStream from browser
-- Support of WebGL 2.0
+- Support of WebGL (WebGL 2.0 is recommended)
 - WebGPU support (optional)

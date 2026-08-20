@@ -637,6 +637,8 @@ Function for setting fps limit:
 sdk.setFpsLimit(limit: number);
 ```
 
+The limit can be changed at any time. On some browsers (e.g. Safari, Firefox) the stream returned by `getStream()` carries a frame rate ceiling that is fixed when the stream is created, so set a higher limit before the first `getStream()` call.
+
 ## How automatically switch presets
 
 ```typescript

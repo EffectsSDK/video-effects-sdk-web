@@ -215,9 +215,8 @@ for (const [_key, value] of Object.entries(layoutPositions)) {
 // Configure SDK settings
 // https://effectssdk.ai/sdk/web/docs/classes/tsvb.html#config
 sdk.config({
-    wasmPaths: { 
-        'ort-wasm.wasm': 'https://effectssdk.ai/sdk/web/3.5.3/ort-wasm.wasm',
-        'ort-wasm-simd.wasm': 'https://effectssdk.ai/sdk/web/3.5.3/ort-wasm-simd.wasm'
+    wasmPaths: {
+        wasm: 'https://effectssdk.ai/sdk/web/3.12.0/ort-wasm-simd-threaded.asyncify.wasm'
     }
 });
 

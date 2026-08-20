@@ -2,26 +2,36 @@
 To use our SDK in production, we suggest moving all the required assets under your own domain and distribute them from there.
 
 # List of assets
-We provide the assets with every SDK update, which will include the ML model files, inference engine wasm files, and the SDK itself.
+We provide the assets with every SDK update, which will include the ML model files, the inference engine wasm file, and the SDK itself.
 
 Example of assets structure:
 
 * assets
   * models
-    * model-1.0.1.tsvb
-    * model-1.2.1.tsvb
-    * model-3.1.1.tsvb
-    * model-4.0.1.tsvb
-    * model-5.5.0.tsvb
-    * m-model-1.0.1.tsvb
-    * m-model-3.1.1.tsvb
-    * m-model-4.0.1.tsvb
-    * m-model-5.5.0.tsvb
-    * model-fd-1.1.0.tsvb
-  * ort-wasm.wasm
-  * ort-wasm-simd.wasm
-  * ort-wasm-simd.jsep.wasm
+    * model-1.2.2.tsvb
+    * model-1.3.2.tsvb
+    * model-3.1.2.tsvb
+    * model-4.0.2.tsvb
+    * model-5.5.2.tsvb
+    * m-model-1.0.2.tsvb
+    * m-model-3.1.2.tsvb
+    * m-model-4.0.2.tsvb
+    * m-model-5.5.2.tsvb
+    * model-fd-1.1.2.tsvb
+  * ort-wasm-simd-threaded.asyncify.wasm
   * tsvb-web.js
+
+An SDK update can bring new model files, which normally come under new names, so host the set you were provided rather than the one listed above.
+
+The inference engine is a single WASM file - `ort-wasm-simd-threaded.asyncify.wasm`. By default the SDK loads it from the same directory where the SDK script is placed, so with the structure above no extra configuration is needed. To host it at a different location, pass its URL explicitly:
+
+```
+sdk.config({
+  wasmPaths: {
+    wasm: 'https://mysite.com/esdk/ort-wasm-simd-threaded.asyncify.wasm'
+  }
+});
+```
 
 # Assets Hosting
 

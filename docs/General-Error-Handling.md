@@ -39,6 +39,8 @@ try {
 }
 ```
 
+Synchronous methods report the same way, by throwing: `setFpsLimit()` on an invalid limit, `getStream()` when the output stream cannot be captured.
+
 When the SDK handles such a failure internally (so it does not reject a public call - e.g. during automatic initialization), it forwards the error to `onError` instead. The same failure is therefore always observable through exactly one channel - the promise rejection or the `onError` event - and never silently dropped.
 
 ### List of Available Codes
@@ -57,7 +59,7 @@ export enum ErrorCode {
   APP_CREATION_ISSUE = 1002, // Unable to initialize the Renderer
   NO_VIDEO_TRACK = 1030, // Provided MediaStream does not contain a video track
   SESSION_INITIALIZATION_FAILED = 1020, // Session server does not allow initialization
-  SESSION_INITIALIZATION_ISSUE = 1021, // Network issue or incorrect WASM files
+  SESSION_INITIALIZATION_ISSUE = 1021, // Network issue or incorrect WASM file
   OUTPUT_STREAM_INVALIDATED = 1062, // Output MediaStream is invalid (canvas rebuilt). Call getStream() again.
 
   // ERROR - GPU and Context Lifecycle
@@ -79,9 +81,13 @@ export enum ErrorCode {
   RENDERING_ISSUE = 1050, // Error occurred during runtime rendering
   ENQUEUE_FRAME_ISSUE = 1060, // Error during frame enqueueing
   READABLE_STREAM_ISSUE = 1061, // Error reading the input stream
+  VIDEO_PLAYBACK_ISSUE = 1031, // The input video element failed to start playback
 
   // ERROR - Environment / Capability
   SOFTWARE_RENDERER_SKIPPED = 1064, // Software WebGL renderer detected; effects are skipped. Set config `allow_software_renderer: true` to run effects anyway.
+
+  // WARNING - Degraded Operation
+  TIMERS_FALLBACK = 1065, // The timer worker is unavailable; the SDK uses the global timers, which the browser throttles in a hidden tab
 }
 ```
 
@@ -125,6 +131,7 @@ RENDER_CONTEXT_LOST = 3030
 RENDERING_ISSUE = 1050
 ENQUEUE_FRAME_ISSUE = 1060
 READABLE_STREAM_ISSUE = 1061
+VIDEO_PLAYBACK_ISSUE = 1031
 ```
 
 ### Software Renderer
@@ -140,6 +147,16 @@ sdk.config({ allow_software_renderer: true });
 ```
 
 You can also detect a software renderer up front with `sdk.isSupported()`, which returns `false` on a software renderer.
+
+### Background Timers
+
+The SDK relies on timers in a few hot spots of the pipeline, and browsers throttle timers in an inactive tab. To avoid that, the SDK runs its timers in a Web Worker created from a `blob:` URL. If the worker cannot be created - usually because a Content-Security-Policy blocks `blob:` workers - the SDK falls back to the global timers and reports `TIMERS_FALLBACK` once. It keeps working, but processing degrades while the tab is hidden.
+
+The inference worker is created the same way, so such a policy also moves the inference to the main thread, which is reported as a warning as well. Allowing blob workers in your Content-Security-Policy prevents both:
+
+```
+worker-src blob:;
+```
 
 ### Effect-Specific Errors
 

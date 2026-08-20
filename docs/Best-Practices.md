@@ -7,7 +7,7 @@
 
   - Checking the configuration (apply default settings and provided by sdk.config({}))
   - Determines which effects/features should be added to the pipeline:
-  - Determines which inferences are supported and loads the appropriate versions of .wasm files.
+  - Determines which inference provider is available (WebGPU or WASM) and loads the inference engine.
   - Determines which ML files are supported and loads the appropriate versions of .tsvb files.
   - Sequentially initializes all models in memory (as required, they cannot be initialized simultaneously).
   - Each ML feature must be authenticated by calling our session server during initialization.
@@ -44,8 +44,9 @@ We recommend using a single, global SDK instance (singleton):
 
 If you need to remove the SDK and use it again later in the same browser session:
 
-- Always call `await sdk.destroy()`. This explicitly frees all GPU and CPU resources.
-- It does **not** affect the inference engine, so all loaded models remain in memory.
+- Always call `await sdk.destroy()`. This explicitly frees the GPU and CPU resources of the processing pipeline.
+- How much is released depends on the `withInference` flag, which is `false` by default. Leave it out here, and pass `true` only when you are done with the SDK for good (see below).
+- Without the flag the call does **not** affect the inference engine, so all loaded models remain in memory.
 - Re-initializing the SDK after this call will **not** trigger a new request to the session server.
 
 ### Completely removing the SDK instance
@@ -68,6 +69,17 @@ If you want to completely remove the SDK instance and do **not** plan to use it 
 
     sdk.config({
         provider: 'wasm'
+    });
+
+
+   ### Inference in a Web Worker
+
+   Inference runs in a dedicated Web Worker, so the heavy work stays off the main thread and the UI keeps responding while frames are processed.
+
+   It's enabled by default, to run the inference on the main thread configure it as follows:
+
+    sdk.config({
+        proxy: false
     });
 
 
