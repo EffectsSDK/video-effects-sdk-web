@@ -65,8 +65,9 @@ import { tsvb } from 'effects-sdk';
 const sdk = new tsvb('{CUSTOMER_ID}');
 
 // The inference runtime is a single WASM file; its version must match the SDK version.
-// The npm package includes the file, so you can host it with your static assets.
-// If wasmPaths is not set, the file is loaded from the Effects SDK CDN.
+// It is not part of the npm package: if wasmPaths is not set, the file is loaded from
+// the Effects SDK CDN. To serve it yourself, download it from the URL below and point
+// wasmPaths.wasm at your copy.
 sdk.config({
     preset: 'balanced',
     provider: 'webgpu',

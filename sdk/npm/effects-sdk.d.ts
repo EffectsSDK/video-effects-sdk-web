@@ -425,7 +425,11 @@ export declare enum ErrorCode {
     OUTPUT_STREAM_INVALIDATED = 1062,
     RENDER_CONTEXT_REBUILD_FAILED = 1063,
     SOFTWARE_RENDERER_SKIPPED = 1064,
-    TIMERS_FALLBACK = 1065
+    TIMERS_FALLBACK = 1065,
+    /** The ONNX Runtime WASM binary could not be fetched from the resolved URL. */
+    WASM_RUNTIME_LOAD_FAILED = 1066,
+    /** config({ wasmPaths }) uses the pre-3.11 shape; see the notice for the URL actually used. */
+    WASM_PATHS_DEPRECATED = 1067
 }
 
 export declare enum ErrorEmitter {
@@ -1204,7 +1208,7 @@ export declare class tsvb {
      *        'colorcorrector': 'url', // The feature allows for the provision of a custom model name; if left empty, the feature will be disabled.
      *        'facedetector': 'url', // The feature allows for the provision of a custom model name; if left empty, the feature will be disabled.
      *    },
-     *    wasmPaths: { // The runtime ships as a single file - ort-wasm-simd-threaded.asyncify.wasm. By default it is loaded from the same directory where the SDK is placed, but a custom URL is also supported (for example, you can load it from a CDN).
+     *    wasmPaths: { // The runtime ships as a single file - ort-wasm-simd-threaded.asyncify.wasm. When it is not set, the SDK looks for the file in the directory it was loaded from, then at sdk_url (if you configured one), and finally on the Effects SDK CDN, at the URL matching the SDK version.
      *        wasm: 'url' // URL of ort-wasm-simd-threaded.asyncify.wasm
      *    }
      * }
@@ -1244,6 +1248,15 @@ export declare class tsvb {
      *    }
      * }
      *```
+     *
+     * @remarks
+     * Up to version 3.10 the runtime came as several files and `wasmPaths` was a map
+     * of file name to URL (`{'ort-wasm.wasm': 'url', 'ort-wasm-simd.wasm': 'url'}`).
+     * ONNX Runtime 1.27 replaced them with a single file, so those names no longer
+     * resolve to anything. Such a config is still accepted: the SDK takes the
+     * directory from it, loads `ort-wasm-simd-threaded.asyncify.wasm` from there if
+     * the file is served, otherwise from the Effects SDK CDN, and reports an
+     * {@link ErrorCode.WASM_PATHS_DEPRECATED} warning. Migrate to `{ wasm: 'url' }`.
      *
      */
     config(config: any): void;
