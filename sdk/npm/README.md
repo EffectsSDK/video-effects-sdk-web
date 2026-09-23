@@ -26,6 +26,7 @@ Effortlessly integrate the most sought-after video effects into your product. Fu
 
 ## Simple Online Demo
 - [Live Demo](https://effectssdk.ai/sdk/dev/demo-latest.html)
+- [Avatars Demo](https://effectssdk.ai/sdk/dev/avatars.html)
 
 ## Features
 
@@ -72,15 +73,39 @@ sdk.config({
     preset: 'balanced',
     provider: 'webgpu',
     test_inference: true,
+    cache_models: true,
     wasmPaths: {
             wasm: 'https://effectssdk.ai/sdk/web/{VERSION}/ort-wasm-simd-threaded.asyncify.wasm'
         }
 });
 
 sdk.preload();
-sdk.cache();
 
 ```
+
+### Pin the SDK version when you self-host assets
+
+If you serve the models and WASM file yourself (`sdk_url` / `wasmPaths` pointing at your own host), install an exact SDK version and commit the lockfile:
+
+```terminal
+npm install effects-sdk@3.13.1 --save-exact
+```
+
+```json
+{
+  "dependencies": {
+    "effects-sdk": "3.13.1"
+  }
+}
+```
+
+A range such as `^3.13.1` lets the package update on the next clean install. The public API remains compatible, but a newer SDK may require new model or WASM files that are not present on your asset host. In that case, the SDK cannot finish loading and `onReady` will not fire.
+
+The same applies to the script tag: keep the version in the URL instead of using a floating `latest` path.
+
+When you deliberately upgrade, copy the new assets from the matching release of the [Video Effects SDK repository](https://github.com/EffectsSDK/video-effects-sdk-web) before updating the package or script URL. Keep the old model files alongside the new ones: model filenames are versioned and do not collide, so clients still running the previous SDK version continue to work.
+
+See [Self Hosted Assets](https://github.com/EffectsSDK/video-effects-sdk-web/blob/main/docs/Self-Hosted-Assets.md) for the complete asset layout and hosting recommendations.
 
 ## Script Tag
 
@@ -96,11 +121,11 @@ const sdk = new window.tsvb('{CUSTOMER_ID}');
 sdk.config({
     preset: 'balanced',
     provider: 'webgpu',
-    test_inference: true
+    test_inference: true,
+    cache_models: true
 });
 
 sdk.preload();
-sdk.cache();
 
 ```
 
@@ -112,11 +137,11 @@ const sdk = new window.tsvb('{CUSTOMER_ID}');
 sdk.config({
     preset: 'balanced',
     provider: 'webgpu',
-    test_inference: true
+    test_inference: true,
+    cache_models: true
 });
 
 sdk.preload();
-sdk.cache();
 
 sdk.onError((e) => {
     switch (e.type) {
@@ -155,11 +180,13 @@ window.addEventListener('load', function () {
 
 ## Documentation
 - [API Reference](https://effectssdk.ai/sdk/web/docs/classes/tsvb.html)
-- [Feature Usage](docs/Features-Usage-Examples.md)
-- [Best Practices](docs/Best-Practices.md)
-- [Error Handling](docs/General-Error-Handling.md)
-- [Self Hosted Assets](docs/Self-Hosted-Assets.md)
-- [License Server for On-Premises Solutions](docs/License-Server-for-On-Premises-Solutions.md)
+- [Feature Usage](https://github.com/EffectsSDK/video-effects-sdk-web/blob/main/docs/Features-Usage-Examples.md)
+- [Custom Overlays - Captions & Lower Thirds](https://github.com/EffectsSDK/video-effects-sdk-web/blob/main/docs/Custom-Overlay-Guide.md)
+- [Avatars Usage](https://github.com/EffectsSDK/video-effects-sdk-web/blob/main/docs/Avatars.md)
+- [Best Practices](https://github.com/EffectsSDK/video-effects-sdk-web/blob/main/docs/Best-Practices.md)
+- [Error Handling](https://github.com/EffectsSDK/video-effects-sdk-web/blob/main/docs/General-Error-Handling.md)
+- [Self Hosted Assets](https://github.com/EffectsSDK/video-effects-sdk-web/blob/main/docs/Self-Hosted-Assets.md)
+- [License Server for On-Premises Solutions](https://github.com/EffectsSDK/video-effects-sdk-web/blob/main/docs/License-Server-for-On-Premises-Solutions.md)
 
 ## Integrations
 - [Electron with Native Inference](https://github.com/EffectsSDK/electron-integration-sample)

@@ -83,6 +83,30 @@ sdk.preload();
 
 ```
 
+### Pin the SDK version when you self-host assets
+
+If you serve the models and WASM file yourself (`sdk_url` / `wasmPaths` pointing at your own host), install an exact SDK version and commit the lockfile:
+
+```terminal
+npm install effects-sdk@3.13.1 --save-exact
+```
+
+```json
+{
+  "dependencies": {
+    "effects-sdk": "3.13.1"
+  }
+}
+```
+
+A range such as `^3.13.1` lets the package update on the next clean install. The public API remains compatible, but a newer SDK may require new model or WASM files that are not present on your asset host. In that case, the SDK cannot finish loading and `onReady` will not fire.
+
+The same applies to the script tag: keep the version in the URL instead of using a floating `latest` path.
+
+When you deliberately upgrade, copy the new assets from the matching release of this repository before updating the package or script URL. Keep the old model files alongside the new ones: model filenames are versioned and do not collide, so clients still running the previous SDK version continue to work.
+
+See [Self Hosted Assets](docs/Self-Hosted-Assets.md) for the complete asset layout and hosting recommendations.
+
 ## Script Tag
 
 ```javascript

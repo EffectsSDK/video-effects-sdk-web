@@ -429,7 +429,9 @@ export declare enum ErrorCode {
     /** The ONNX Runtime WASM binary could not be fetched from the resolved URL. */
     WASM_RUNTIME_LOAD_FAILED = 1066,
     /** config({ wasmPaths }) uses the pre-3.11 shape; see the notice for the URL actually used. */
-    WASM_PATHS_DEPRECATED = 1067
+    WASM_PATHS_DEPRECATED = 1067,
+    /** The runtime was not served from the first candidate location; see the notice for the URL actually used. */
+    WASM_RUNTIME_LOCATION_FALLBACK = 1068
 }
 
 export declare enum ErrorEmitter {
@@ -1208,7 +1210,7 @@ export declare class tsvb {
      *        'colorcorrector': 'url', // The feature allows for the provision of a custom model name; if left empty, the feature will be disabled.
      *        'facedetector': 'url', // The feature allows for the provision of a custom model name; if left empty, the feature will be disabled.
      *    },
-     *    wasmPaths: { // The runtime ships as a single file - ort-wasm-simd-threaded.asyncify.wasm. When it is not set, the SDK looks for the file in the directory it was loaded from, then at sdk_url (if you configured one), and finally on the Effects SDK CDN, at the URL matching the SDK version.
+     *    wasmPaths: { // The runtime ships as a single file - ort-wasm-simd-threaded.asyncify.wasm. This setting is what names its location; set it and nothing below applies. Otherwise the SDK loads it from the directory the SDK script was loaded from, falling back to sdk_url when the file is not served there, and to the Effects SDK CDN (at the URL matching the SDK version) when neither location is known.
      *        wasm: 'url' // URL of ort-wasm-simd-threaded.asyncify.wasm
      *    }
      * }
@@ -1250,6 +1252,23 @@ export declare class tsvb {
      *```
      *
      * @remarks
+     * `wasmPaths` is the only setting that names the runtime's location, and it is
+     * always honoured — script tag or npm, and whatever `sdk_url` says. `sdk_url`
+     * is the folder the models are served from; it is consulted for the runtime
+     * only as a fallback, for integrations that mirror the whole `dist/` layout
+     * there. Set `wasmPaths` whenever the two are not the same place.
+     *
+     * That fallback costs one HEAD request, and only in the case that needs it: a
+     * `<script>`-tag integration that also sets `sdk_url`, where the two disagree
+     * about where the runtime lives. A single location — the `<script>` directory
+     * on its own, or `sdk_url` on its own under the npm builds — is used without any
+     * check, as is the CDN. A location that refuses HEAD is used rather than
+     * skipped, and falling back reports an
+     * {@link ErrorCode.WASM_RUNTIME_LOCATION_FALLBACK} warning naming the URL used.
+     * Setting `wasmPaths` skips the lookup entirely. The CDN is never used as a
+     * fallback for a location you configured, so hosting the assets yourself keeps
+     * the SDK off third-party origins even when the file is missing.
+     *
      * Up to version 3.10 the runtime came as several files and `wasmPaths` was a map
      * of file name to URL (`{'ort-wasm.wasm': 'url', 'ort-wasm-simd.wasm': 'url'}`).
      * ONNX Runtime 1.27 replaced them with a single file, so those names no longer

@@ -8,15 +8,14 @@ Example of assets structure:
 
 * assets
   * models
-    * model-1.2.2.tsvb
-    * model-1.3.2.tsvb
+    * model-1.6.0.tsvb
     * model-3.1.2.tsvb
     * model-4.0.2.tsvb
-    * model-5.5.2.tsvb
-    * m-model-1.0.2.tsvb
+    * model-5.6.0.tsvb
+    * m-model-1.6.0.tsvb
     * m-model-3.1.2.tsvb
     * m-model-4.0.2.tsvb
-    * m-model-5.5.2.tsvb
+    * m-model-5.6.0.tsvb
     * model-fd-1.1.2.tsvb
   * ort-wasm-simd-threaded.asyncify.wasm
   * tsvb-web.js
