@@ -187,6 +187,18 @@ window.addEventListener('load', function () {
 - [Error Handling](https://github.com/EffectsSDK/video-effects-sdk-web/blob/main/docs/General-Error-Handling.md)
 - [Self Hosted Assets](https://github.com/EffectsSDK/video-effects-sdk-web/blob/main/docs/Self-Hosted-Assets.md)
 - [License Server for On-Premises Solutions](https://github.com/EffectsSDK/video-effects-sdk-web/blob/main/docs/License-Server-for-On-Premises-Solutions.md)
+- [LLM Integration Guide (llms.txt)](https://effectssdk.ai/sdk/web/llms.txt)
+
+## AI-Assisted Integration
+
+Using an AI coding assistant (Claude Code, Cursor, GitHub Copilot, ChatGPT, etc.)? Give it our [llms.txt](https://effectssdk.ai/sdk/web/llms.txt): a single file with the complete public API, configuration options, integration patterns, error codes, and common pitfalls, written for LLMs.
+
+Example prompt:
+
+```text
+Read https://effectssdk.ai/sdk/web/llms.txt and integrate the Effects SDK into my app:
+apply background blur to the camera stream and send the processed video track over WebRTC.
+```
 
 ## Integrations
 - [Electron with Native Inference](https://github.com/EffectsSDK/electron-integration-sample)
